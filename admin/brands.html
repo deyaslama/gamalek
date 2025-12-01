@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إدارة الماركات</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Cairo',sans-serif;background:#f4f7fb;color:#333;}
+
+.sidebar{
+  width:230px;background:#006b6a;height:100vh;position:fixed;
+  right:0;top:0;padding:20px;color:#fff;
+}
+.sidebar h2{text-align:center;font-size:22px;margin-bottom:25px;}
+.nav-links{display:flex;flex-direction:column;gap:15px;}
+.nav-links a{color:#fff;padding:10px;border-radius:6px;font-size:16px;text-decoration: none;}
+.nav-links a:hover,.nav-links a.active{background:#009b9b;}
+
+.main{margin-right:25px;padding:25px;}
+.header{
+  background:#fff;padding:15px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom:25px;display:flex;justify-content:space-between;align-items:center;
+}
+
+.card{
+  background:#fff;padding:20px;border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.06);margin-bottom:25px;
+}
+
+.btn{background:#006b6a;color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;}
+.btn-red{background:#d62828;color:#fff;}
+.btn-light{background:#e4e4e4;color:#333;}
+
+.search-input{
+  width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;font-size:14px;margin-bottom:10px;
+}
+
+table{width:100%;border-collapse:collapse;margin-top:10px;}
+th,td{padding:10px;text-align:center;border-bottom:1px solid #eee;font-size:13px;}
+th{background:#f1f1f1;font-weight:600;}
+
+.brand-img{width:60px;height:60px;object-fit:contain;border:1px solid #ccc;padding:3px;border-radius:6px;}
+.star{font-size:22px;color:#ccc;cursor:pointer;}
+.star.on{color:#ffbf00;}
+
+.modal-overlay{
+  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:999;
+}
+.modal-box{
+  background:#fff;padding:20px;border-radius:10px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.2);width:420px;
+}
+.modal-box h3{text-align:center;color:#006b6a;margin-bottom:10px;font-size:18px;}
+.modal-input{width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;font-size:14px;margin-bottom:8px;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;}
+</style>
+</head>
+
+<body>
+
+
+</div>
+
+<div class="main">
+
+  <div class="header">
+    <span style="font-size:20px;font-weight:600;">إدارة الماركات</span>
+    <div>
+      <button class="btn" onclick="openAddModal()">➕ إضافة ماركة</button>
+      <button class="btn" onclick="downloadExcel()">📥 تصدير Excel</button>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <input id="searchInput" class="search-input" placeholder="بحث عن الماركات..." oninput="loadBrands()">
+
+    <table>
+      <thead>
+        <tr>
+          <th>⭐</th>
+          <th>الصورة</th>
+          <th>اسم الماركة</th>
+          <th>كود الماركة</th>
+          <th>عدد المنتجات</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="brandTable"></tbody>
+    </table>
+
+  </div>
+
+</div>
+
+<!-- إضافة ماركة -->
+<div id="addModal" class="modal-overlay">
+  <div class="modal-box">
+    <h3>إضافة ماركة</h3>
+
+    <input id="add_name" class="modal-input" placeholder="اسم الماركة">
+    <input id="add_code" class="modal-input" placeholder="كود الماركة">
+
+    <input id="add_image" class="modal-input" placeholder="رابط صورة الماركة">
+
+    <div class="modal-actions">
+      <button class="btn" onclick="addBrand()">حفظ</button>
+      <button class="btn-red" onclick="closeAddModal()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- تعديل ماركة -->
+<div id="editModal" class="modal-overlay">
+  <div class="modal-box">
+    <h3>تعديل ماركة</h3>
+
+    <input type="hidden" id="edit_id">
+
+    <input id="edit_name" class="modal-input" placeholder="اسم الماركة">
+    <input id="edit_code" class="modal-input" placeholder="كود الماركة">
+    <input id="edit_image" class="modal-input" placeholder="رابط صورة الماركة">
+
+    <img id="edit_preview" style="width:80px;margin-top:5px;display:block;">
+
+    <select id="edit_featured" class="modal-input">
+      <option value="0">غير مميزة</option>
+      <option value="1">⭐ مميزة</option>
+    </select>
+
+    <div class="modal-actions">
+      <button class="btn" onclick="saveBrand()">حفظ التعديل</button>
+      <button class="btn-red" onclick="closeEditModal()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = "http://localhost:3000";
+
+/* ========== عرض الماركات ========== */
+async function loadBrands() {
+  const q = document.getElementById("searchInput").value;
+  const res = await fetch(API + "/api/admin/brands?search=" + q);
+  const brands = await res.json();
+
+  const tbody = document.getElementById("brandTable");
+  tbody.innerHTML = "";
+
+  brands.forEach(b => {
+    tbody.innerHTML += `
+      <tr>
+        <td><span class="star ${b.featured ? 'on':''}" onclick="toggleFeatured(${b.id},${b.featured})">${b.featured?"★":"☆"}</span></td>
+        <td><img src="${b.image_url || ''}" class="brand-img"></td>
+        <td>${b.name}</td>
+        <td>${b.brand_code || "-"}</td>
+        <td>${b.product_count}</td>
+        <td>
+          <button class="btn-light" onclick="openEditModal(${b.id}, '${b.name}', '${b.brand_code}', '${b.image_url}', ${b.featured})">تعديل</button>
+          <button class="btn-red" onclick="deleteBrand(${b.id})">حذف</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+/* ========== إضافة ماركة (JSON) ========== */
+async function addBrand() {
+  const body = {
+    name: document.getElementById("add_name").value,
+    brand_code: document.getElementById("add_code").value,
+    image_url: document.getElementById("add_image").value
+  };
+
+  await fetch(API + "/api/admin/brands", {
+    method: "POST",
+    headers: { "Content-Type":"application/json" },
+    body: JSON.stringify(body)
+  });
+
+  closeAddModal();
+  loadBrands();
+}
+
+/* ========== تعديل ماركة (JSON) ========== */
+function openEditModal(id, name, code, img, featured) {
+  document.getElementById("edit_id").value = id;
+  document.getElementById("edit_name").value = name;
+  document.getElementById("edit_code").value = code;
+  document.getElementById("edit_image").value = img || "";
+  document.getElementById("edit_preview").src = img || "";
+  document.getElementById("edit_featured").value = featured;
+
+  document.getElementById("editModal").style.display = "flex";
+}
+
+async function saveBrand() {
+  const id = document.getElementById("edit_id").value;
+
+  const body = {
+    name: document.getElementById("edit_name").value,
+    brand_code: document.getElementById("edit_code").value,
+    image_url: document.getElementById("edit_image").value,
+    featured: document.getElementById("edit_featured").value
+  };
+
+  await fetch(API + "/api/admin/brands/" + id, {
+    method: "PUT",
+    headers: { "Content-Type":"application/json" },
+    body: JSON.stringify(body)
+  });
+
+  closeEditModal();
+  loadBrands();
+}
+
+/* ========== حذف ماركة ========== */
+async function deleteBrand(id) {
+  if (!confirm("هل تريد حذف هذه الماركة؟")) return;
+
+  await fetch(API + "/api/admin/brands/" + id, { method: "DELETE" });
+  loadBrands();
+}
+
+/* ========== نجمة ========== */
+async function toggleFeatured(id, current) {
+  await fetch(API + "/api/admin/brands/feature", {
+    method: "POST",
+    headers: { "Content-Type":"application/json" },
+    body: JSON.stringify({ id, featured: current ? 0 : 1 })
+  });
+
+  loadBrands();
+}
+
+/* ========== Excel ========== */
+function downloadExcel() {
+  window.location.href = API + "/api/admin/brands/excel";
+}
+
+/* ========== Modals ========== */
+function openAddModal(){ document.getElementById("addModal").style.display="flex"; }
+function closeAddModal(){ document.getElementById("addModal").style.display="none"; }
+function closeEditModal(){ document.getElementById("editModal").style.display="none"; }
+
+/* ========== بداية التحميل ========== */
+loadBrands();
+</script>
+
+</body>
+</html>
