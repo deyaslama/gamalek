@@ -649,6 +649,71 @@ header{
   font-size:17px;
   font-weight:bold;
 }
+/* ====================== هيدر الجوال ====================== */
+
+/* إخفاء روابط الهيدر القديمة في الشاشات الصغيرة */
+@media (max-width: 768px) {
+  .nav-links,
+  #mainHeader .logo div:last-child {  /* إخفاء كلمة جمالك والاكتفاء بالدائرة ج */
+    display: none !important;
+  }
+
+  /* تصغير الهيدر */
+  header .nav {
+    gap: 10px;
+  }
+
+  /* زر المنيو */
+  #menuBtn {
+    display: block !important;
+    font-size: 26px;
+    cursor: pointer;
+    padding: 6px 10px;
+    color: #8a004a;
+  }
+}
+
+/* الوضع الطبيعي (ديسكتوب) */
+#menuBtn {
+  display: none;
+}
+
+/* القائمة الجانبية */
+#sideMenu {
+  position: fixed;
+  top: 0;
+  right: -260px;
+  width: 250px;
+  height: 100%;
+  background: #ffffff;
+  box-shadow: -3px 0 10px rgba(0,0,0,0.15);
+  padding: 20px;
+  z-index: 2000;
+  transition: 0.3s;
+}
+
+#sideMenu a {
+  display: block;
+  padding: 12px 0;
+  font-size: 18px;
+  color: #8a004a;
+  text-decoration: none;
+  border-bottom: 1px solid #eee;
+}
+
+#sideMenu a:hover {
+  color: #E91E63;
+}
+
+/* خلفية عند فتح القائمة */
+#menuOverlay {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.4);
+  display:none;
+  z-index:1500;
+}
 
 /* ===================== الصفحات ===================== */
 .page{ display:none; }
@@ -789,6 +854,8 @@ header{
   </div>
 </div>
 
+      <!-- زر المنيو للجوال -->
+<div id="menuBtn" onclick="openMenu()">☰</div>
 
       <!-- أيقونة السلة -->
       <div onclick="openCart()" style="cursor:pointer;font-size:22px;color:#8a004a;position:relative;">
@@ -813,6 +880,19 @@ header{
   </div>
 </header>
 
+<!--  للجوال خلفية القائمة -->
+<div id="menuOverlay" onclick="closeMenu()"></div>
+
+<!-- القائمة الجانبية -->
+<div id="sideMenu">
+  <a href="#" onclick="go('home'); closeMenu()">🏠 الرئيسية</a>
+  <a href="#" onclick="go('products'); closeMenu()">🛍 المنتجات</a>
+  <a href="#" onclick="go('brands'); closeMenu()">⭐ الماركات</a>
+  <a href="#" onclick="go('offers'); closeMenu()">🎁 العروض</a>
+  <a href="#" onclick="go('categories'); closeMenu()">📂 التصنيفات</a>
+  <a href="#" onclick="go('wishlist'); closeMenu()">❤️ المفضّلات</a>
+  <a href="#" onclick="go('profile'); closeMenu()">👤 حسابي</a>
+</div>
 
 
 <!-- ========================= السلة الجانبية (ثابتة) ========================= -->
@@ -3325,7 +3405,16 @@ async function sendResetCode() {
   rpEmail.value = email;
   go("reset");
 }
+// ====================== شكل الهيدر في الجوال ======================
+function openMenu() {
+  document.getElementById("sideMenu").style.right = "0px";
+  document.getElementById("menuOverlay").style.display = "block";
+}
 
+function closeMenu() {
+  document.getElementById("sideMenu").style.right = "-260px";
+  document.getElementById("menuOverlay").style.display = "none";
+}
 
 // ====================== إعادة ضبط كلمة المرور ======================
 async function resetPassword() {
@@ -3575,5 +3664,6 @@ function printInvoice() {
 
 </body>
 </html>
+
 
 
