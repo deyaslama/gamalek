@@ -951,7 +951,7 @@ header{
   </div>
 
   <!-- زر الذهاب للدفع -->
-  <button onclick="goToCheckout()" 
+  <button onclick="checkBeforeCheckout()" 
           style="background:#E91E63;color:white;width:100%;margin-bottom:5px;padding:10px;border:none;border-radius:10px;font-size:16px;font-weight:700;">
     إتمام الطلب
   </button>
@@ -1523,7 +1523,9 @@ function go(page, data = null) {
   // إظهار الصفحة المطلوبة
   const targetPage = document.getElementById("page-" + page);
   if (targetPage) targetPage.classList.add("active");
-
+	
+  // 🔥 إغلاق السلة تلقائياً عند الذهاب لتسجيل الدخول
+  if(page === "login") closeCart();
   // تحميل بيانات حسب الصفحة
 
   if (page === "home") loadHome();
@@ -3475,8 +3477,21 @@ async function resetPassword() {
   alert("✔ تم تغيير كلمة المرور بنجاح!");
   go("login");
 }
+// ====================== تفعيل تسجيل الدخول عند اتمام الدفع  ======================
+function isLoggedIn() {
+    let user = localStorage.getItem("user");
+    return user && user !== "null" && user !== "";
+}
+function checkBeforeCheckout() {
 
+    if (!isLoggedIn()) {
+        showLoginRequiredPopup();
+        return;
+    }
 
+    // إذا كان مسجل دخول → اذهب لصفحة الدفع
+    go("checkout");
+}	
 // ====================== تفعيل الحساب ======================
 async function verifyAccount(){
   const phone = document.getElementById("vPhone").value.trim();
@@ -3501,7 +3516,14 @@ async function verifyAccount(){
     go("login");
   }, 1200);
 }
+function showLoginRequiredPopup() {
+    document.getElementById("loginRequiredPopup").style.display = "flex";
+}
 
+function goToLogin() {
+    document.getElementById("loginRequiredPopup").style.display = "none";
+    go("login");  // ينقلك لصفحة تسجيل الدخول
+}
 
 //=================== تايمر رسالة التفعيل ======================
 let verifyTimer = null;
@@ -3701,6 +3723,7 @@ function printInvoice() {
 
 </body>
 </html>
+
 
 
 
