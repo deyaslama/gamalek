@@ -156,11 +156,11 @@ body {
 async function loadStats() {
 
   // جلب جميع الطلبات من السيرفر
-  const orders = await fetch("http://localhost:3000/api/orders")
+  const orders = await fetch("https://gamalek.onrender.com/api/orders")
     .then(r => r.json());
 
   // جلب عدد المنتجات من السيرفر
-  const prodStats = await fetch("http://localhost:3000/api/admin/products")
+  const prodStats = await fetch("https://gamalek.onrender.com/api/admin/products")
     .then(r => r.json());
 
   // عدد المنتجات
@@ -199,3 +199,4 @@ loadStats();
 
 </body>
 </html>
+
