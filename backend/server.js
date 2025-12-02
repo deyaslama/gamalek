@@ -47,7 +47,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 async function sendEmail(to, subject, html) {
   try {
     const result = await resend.emails.send({
-      from: "Gamalek <onboarding@resend.dev>",
+      from: "Gamalek <no-reply@gamalek.store>",
       to,
       subject,
       html
@@ -768,6 +768,7 @@ app.put("/api/orders/:id/status", (req, res) => {
 app.listen(PORT, () =>
   console.log("✔ Server running at http://localhost:" + PORT)
 );
+
 
 
 
