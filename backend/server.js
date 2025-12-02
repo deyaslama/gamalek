@@ -76,10 +76,10 @@ if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
 
 // --------------------------- LOGIN --------------------------- //
 // --------------------------- REGISTER --------------------------- //
-app.post("/api/register", (req, res) => {
+app.post("/api/register", async (req, res) => {
   const { name, phone, email, password, address } = req.body;
 
-  db.get("SELECT * FROM users WHERE phone=? OR email=?", [phone, email], (err, row) => {
+  db.get("SELECT * FROM users WHERE phone=? OR email=?", [phone, email], async (err, row) => {
     if (row) {
       return res.json({ success: false, message: "رقم الجوال أو الإيميل مسجل مسبقاً" });
     }
@@ -93,18 +93,22 @@ app.post("/api/register", (req, res) => {
       async function (err2) {
         if (err2) return res.json({ success: false, message: "خطأ في السيرفر" });
 
-        await sendEmail(
-  email,
-  "تفعيل حسابك",
-  `<p>كود التفعيل الخاص بك هو: <b>${verifyCode}</b></p>`
-);
+        // إرسال الإيميل بعد INSERT وليس قبل
+        const sent = await sendEmail(
+          email,
+          "تفعيل حسابك",
+          `<p>كود التفعيل الخاص بك هو: <b>${verifyCode}</b></p>`
+        );
 
+        if (!sent)
+          return res.json({ success: false, message: "تعذر إرسال الإيميل" });
 
         return res.json({ success: true, id: this.lastID });
       }
     );
   });
 });
+
 
 
 
@@ -125,7 +129,7 @@ app.post("/api/login", (req, res) => {
 app.post("/api/verify", (req, res) => {
   const { phone, code } = req.body;
 
-  db.get("SELECT * FROM users WHERE phone=? AND verify_code=?", [phone, code], (err, row) => {
+  db.get("SELECT * FROM users WHERE TRIM(phone)=TRIM(?) AND verify_code=?", [phone, code], (err, row) => {
     if (!row) return res.json({ success: false, message: "كود خاطئ" });
 
     db.run("UPDATE users SET email_verified=1, verify_code=NULL WHERE phone=?", [phone]);
@@ -763,5 +767,6 @@ app.put("/api/orders/:id/status", (req, res) => {
 app.listen(PORT, () =>
   console.log("✔ Server running at http://localhost:" + PORT)
 );
+
 
 
