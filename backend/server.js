@@ -79,7 +79,7 @@ if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
 app.post("/api/register", async (req, res) => {
   const { name, phone, email, password, address } = req.body;
 
-  db.get("SELECT * FROM users WHERE phone=? OR email=?", [phone, email], async (err, row) => {
+  db.get("SELECT * FROM users WHERE phone=? OR email=?", [phone, email], (err, row) => {
     if (row) {
       return res.json({ success: false, message: "رقم الجوال أو الإيميل مسجل مسبقاً" });
     }
@@ -93,7 +93,7 @@ app.post("/api/register", async (req, res) => {
       async function (err2) {
         if (err2) return res.json({ success: false, message: "خطأ في السيرفر" });
 
-        // إرسال الإيميل بعد INSERT وليس قبل
+        // إرسال الإيميل
         const sent = await sendEmail(
           email,
           "تفعيل حسابك",
@@ -108,6 +108,7 @@ app.post("/api/register", async (req, res) => {
     );
   });
 });
+
 
 
 
@@ -767,6 +768,7 @@ app.put("/api/orders/:id/status", (req, res) => {
 app.listen(PORT, () =>
   console.log("✔ Server running at http://localhost:" + PORT)
 );
+
 
 
 
