@@ -46,16 +46,25 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function sendEmail(to, subject, html) {
   try {
-    await resend.emails.send({
+    const result = await resend.emails.send({
       from: "Gamalek <onboarding@resend.dev>",
       to,
       subject,
       html
     });
+
+    console.log("✔ Email Sent Successfully:", result);
+    return true;
+
   } catch (err) {
-    console.error("Email Sending Error:", err);
+    console.error("❌ Email Sending Error:");
+    console.error("Message:", err.message);
+    console.error("Status:", err.statusCode || "NO_STATUS");
+    console.error("Details:", err.response || err);
+    return false;
   }
 }
+
 
 
 const dbFile = path.join(process.cwd(), "database.db");
@@ -754,4 +763,5 @@ app.put("/api/orders/:id/status", (req, res) => {
 app.listen(PORT, () =>
   console.log("✔ Server running at http://localhost:" + PORT)
 );
+
 
