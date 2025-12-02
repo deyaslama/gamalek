@@ -4,7 +4,7 @@ import sqlite3 from "sqlite3";
 import path from "path";
 import fs from "fs";
 import XLSX from "xlsx";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -42,13 +42,20 @@ app.get("/admin-login", (req, res) => {
 // تحميل الملفات الأخرى في المشروع الرئيسي
 app.use("/", express.static(path.join(process.cwd(), "..")));
 
-const mail = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+async function sendEmail(to, subject, html) {
+  try {
+    await resend.emails.send({
+      from: "Gamalek <onboarding@resend.dev>",
+      to,
+      subject,
+      html
+    });
+  } catch (err) {
+    console.error("Email Sending Error:", err);
   }
-});
+}
 
 
 const dbFile = path.join(process.cwd(), "database.db");
@@ -74,14 +81,15 @@ app.post("/api/register", (req, res) => {
       `INSERT INTO users (name, phone, email, password, address, verify_code, email_verified)
        VALUES (?, ?, ?, ?, ?, ?, 0)`,
       [name, phone, email, password, address, verifyCode],
-      function (err2) {
+      async function (err2) {
         if (err2) return res.json({ success: false, message: "خطأ في السيرفر" });
 
-        mail.sendMail({
-          to: email,
-          subject: "تفعيل حسابك",
-          text: `كود التفعيل الخاص بك هو: ${verifyCode}`
-        });
+        await sendEmail(
+  email,
+  "تفعيل حسابك",
+  `<p>كود التفعيل الخاص بك هو: <b>${verifyCode}</b></p>`
+);
+
 
         return res.json({ success: true, id: this.lastID });
       }
@@ -120,18 +128,19 @@ app.post("/api/verify", (req, res) => {
 app.post("/api/forgot", (req, res) => {
   const { email } = req.body;
 
-  db.get("SELECT * FROM users WHERE email=?", [email], (err, user) => {
+  db.get("SELECT * FROM users WHERE email=?", [email], async (err, user) => {
     if (!user) return res.json({ success: false, message: "الإيميل غير موجود" });
 
     const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
 
     db.run("UPDATE users SET reset_code=? WHERE email=?", [resetCode, email]);
 
-    mail.sendMail({
-      to: email,
-      subject: "إعادة ضبط كلمة المرور",
-      text: `كود استعادة كلمة المرور: ${resetCode}`
-    });
+    await sendEmail(
+  email,
+  "إعادة ضبط كلمة المرور",
+  `<p>كود استعادة كلمة المرور هو: <b>${resetCode}</b></p>`
+);
+
 
     res.json({ success: true });
   });
@@ -152,17 +161,18 @@ app.post("/api/resend-verify", (req, res) => {
     db.run(
       "UPDATE users SET verify_code=? WHERE phone=?",
       [newCode, phone],
-      (err2) => {
+      async (err2) => {
         if (err2) {
           return res.json({ success: false, message: "خطأ في السيرفر" });
         }
 
         // إرسال الإيميل
-        mail.sendMail({
-          to: user.email,
-          subject: "إعادة إرسال كود التفعيل",
-          text: `كود التفعيل الجديد هو: ${newCode}`
-        });
+        await sendEmail(
+  user.email,
+  "إعادة إرسال كود التفعيل",
+  `<p>كود التفعيل الجديد هو: <b>${newCode}</b></p>`
+);
+
 
         res.json({ success: true, message: "تم إرسال كود جديد" });
       }
@@ -744,3 +754,4 @@ app.put("/api/orders/:id/status", (req, res) => {
 app.listen(PORT, () =>
   console.log("✔ Server running at http://localhost:" + PORT)
 );
+
