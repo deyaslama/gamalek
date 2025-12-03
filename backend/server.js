@@ -236,6 +236,7 @@ db.serialize(() => {
       discount_type TEXT DEFAULT "none",
       featured INTEGER DEFAULT 0,
       brand_id INTEGER,
+      stock_qty INTEGER DEFAULT 0,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -399,14 +400,15 @@ app.post("/api/admin/products", (req, res) => {
     discount_type,
     featured,
     brand_id,
+    stock_qty
   } = req.body;
 
   db.run(
     `
     INSERT INTO products
     (name, base_price, askon_code, intl_code, image_url, category,
-     description, discount_value, discount_type, featured, brand_id)
-    VALUES(?,?,?,?,?,?,?,?,?,?,?)
+     description, discount_value, discount_type, featured, brand_id, stock_qty)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
   `,
     [
       name,
@@ -420,6 +422,7 @@ app.post("/api/admin/products", (req, res) => {
       discount_type,
       featured,
       brand_id,
+      stock_qty
     ],
     (err) => {
       if (err) return res.json({ error: "Insert Error" });
@@ -443,13 +446,14 @@ app.put("/api/admin/products/:id", (req, res) => {
     discount_type,
     featured,
     brand_id,
+    stock_qty
   } = req.body;
 
   db.run(
     `
     UPDATE products SET
       name=?, base_price=?, askon_code=?, intl_code=?, image_url=?,
-      category=?, description=?, discount_value=?, discount_type=?, featured=?, brand_id=?
+      category=?, description=?, discount_value=?, discount_type=?, featured=?, brand_id=?, stock_qty=?
     WHERE id=?
   `,
     [
@@ -464,7 +468,8 @@ app.put("/api/admin/products/:id", (req, res) => {
       discount_type,
       featured,
       brand_id,
-      id,
+      stock_qty,
+      id
     ],
     (err) => {
       if (err) return res.json({ error: "Update Error" });
@@ -517,8 +522,8 @@ app.post("/api/admin/products/upload-excel", upload.single("file"), (req, res) =
     data.forEach(p => {
       db.run(
         `INSERT INTO products 
-        (name, base_price, askon_code, intl_code, image_url, category, description, discount_value, discount_type, featured, brand_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (name, base_price, askon_code, intl_code, image_url, category, description, discount_value, discount_type, featured, brand_id, stock_qty)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           p.name || "",
           p.base_price || 0,
@@ -530,7 +535,8 @@ app.post("/api/admin/products/upload-excel", upload.single("file"), (req, res) =
           p.discount_value || 0,
           p.discount_type || "none",
           p.featured || 0,
-          p.brand_id || null
+          p.brand_id || null,
+          p.stock_qty || 0
         ]
       );
     });
@@ -642,9 +648,11 @@ items.forEach((item) => {
       priceAfterDiscount,
       priceWithVat,
       itemTotal
-    ]
+    ]);
+db.run(
+    "UPDATE products SET stock_qty = stock_qty - ? WHERE id = ?",
+    [item.qty, item.id]
   );
-
 });
 
 
@@ -768,6 +776,7 @@ app.put("/api/orders/:id/status", (req, res) => {
 app.listen(PORT, () =>
   console.log("✔ Server running at http://localhost:" + PORT)
 );
+
 
 
 
