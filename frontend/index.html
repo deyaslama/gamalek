@@ -2224,6 +2224,45 @@ function safeNum(n){
 
 
 async function loadHome(){
+// وضع سكيليتون مؤقت في الصفحة الرئيسية قبل تحميل المنتجات
+const featuredGrid = document.getElementById("featuredGrid");
+const discountGrid = document.getElementById("discountGrid");
+
+// شكل كارت سكيليتون واحد
+const skeletonCard = `
+  <div style="
+    background:#fff;
+    border-radius:16px;
+    padding:12px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+  ">
+    <div style="
+      width:100%;
+      height:160px;
+      background:#e4e4e4;
+      border-radius:12px;
+      animation:pulse 1.4s infinite;
+    "></div>
+
+    <div style="height:14px;background:#e4e4e4;border-radius:8px;margin-top:10px;width:80%;animation:pulse 1.4s infinite;"></div>
+    <div style="height:14px;background:#e4e4e4;border-radius:8px;margin-top:8px;width:60%;animation:pulse 1.4s infinite;"></div>
+  </div>
+`;
+
+// نكرر 6 مرات
+featuredGrid.innerHTML = skeletonCard.repeat(6);
+discountGrid.innerHTML = skeletonCard.repeat(6);
+
+// حركة السكيليتون
+const style = document.createElement("style");
+style.innerHTML = `
+@keyframes pulse {
+  0% { opacity:.6; }
+  50% { opacity:1; }
+  100% { opacity:.6; }
+}
+`;
+document.head.appendChild(style);
 
   // تحميل الماركات
   const brandsRes = await fetch(API + "/api/admin/brands");
@@ -3834,3 +3873,4 @@ function printInvoice() {
 
 </body>
 </html>
+
