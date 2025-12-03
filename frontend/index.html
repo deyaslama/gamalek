@@ -1735,7 +1735,9 @@ async function loadProductDetails(id) {
       <div style="flex:1;min-width:260px;">
         <img src="${safeImageURL(p.image_url)}"
         onerror="this.src='https://via.placeholder.com/400?text=No+Image'"
-        style="width:100%;border-radius:16px;">
+        style="width:100%;border-radius:16px;
+        ${p.stock_qty == 0 ? 'filter:grayscale(100%);opacity:0.5;' : ''}">
+
       </div>
 
       <!-- بيانات المنتج -->
@@ -1772,11 +1774,13 @@ async function loadProductDetails(id) {
         </p>
 
         <!-- زر الإضافة للسلة -->
-        <button id="productAddBtn"
-          data-id="${p.id}"
-          onclick="addToCart(${p.id})">
-          أضف للسلة
-        </button>
+   <button id="productAddBtn"
+        data-id="${p.id}"
+        ${p.stock_qty == 0 ? 'disabled style="opacity:0.4;cursor:not-allowed;background:#999;"' : ''}
+        onclick="${p.stock_qty == 0 ? '' : `addToCart(${p.id})`}">  
+        ${p.stock_qty == 0 ? "غير متوفر" : "أضف للسلة"}
+   </button>
+
 
       </div>
 
@@ -2282,10 +2286,10 @@ function makeProductCard(p){
 
         <!-- الصورة -->
         <img class="product-img"
-		     style="${p.stock_qty == 0 ? 'filter:grayscale(100%);opacity:0.5;' : ''}"
-             src="${safeImageURL(p.image_url)}"
-             onerror="this.src='https://via.placeholder.com/200?text=No+Image'"
-             onclick="go('product', ${p.id})"/>
+     src="${safeImageURL(p.image_url)}"
+     onerror="this.src='https://via.placeholder.com/200?text=No+Image'"
+     onclick="${outOfStock ? '' : `go('product', ${p.id})`}"
+     style="filter:${outOfStock ? 'grayscale(100%) opacity(40%)' : 'none'};" />
       </div>
 
       <!-- اسم المنتج -->
@@ -3795,6 +3799,7 @@ function printInvoice() {
 
 </body>
 </html>
+
 
 
 
