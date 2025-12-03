@@ -492,6 +492,7 @@ async function addProduct(){
     brand_id: document.getElementById("brand_id").value,
     category: document.getElementById("category").value,
     description: document.getElementById("description").value,
+    stock_qty: document.getElementById("stock_qty").value
     discount_value: document.getElementById("discount_value").value,
     discount_type: document.getElementById("discount_type").value,
     featured: document.getElementById("featured").value
@@ -520,6 +521,7 @@ function openEditModal(id){
   document.getElementById("edit_brand_id").value = p.brand_id || "";
   document.getElementById("edit_category").value = p.category;
   document.getElementById("edit_description").value = p.description || "";
+  document.getElementById("edit_stock_qty").value = p.stock_qty;
   document.getElementById("edit_discount_value").value = p.discount_value;
   document.getElementById("edit_discount_type").value = p.discount_type;
   document.getElementById("edit_featured").value = p.featured;
@@ -539,6 +541,7 @@ async function updateProduct(){
     brand_id: document.getElementById("edit_brand_id").value,
     category: document.getElementById("edit_category").value,
     description: document.getElementById("edit_description").value,
+    stock_qty: document.getElementById("edit_stock_qty").value
     discount_value: document.getElementById("edit_discount_value").value,
     discount_type: document.getElementById("edit_discount_type").value,
     featured: document.getElementById("edit_featured").value
