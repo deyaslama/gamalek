@@ -140,6 +140,7 @@ th{background:#f1f1f1;font-weight:600;}
           <th>القسم</th>
           <th>أسكون</th>
           <th>الدولي</th>
+          <th>المخزون</th>
           <th>إجراءات</th>
         </tr>
       </thead>
@@ -163,11 +164,9 @@ th{background:#f1f1f1;font-weight:600;}
     <input id="image_url" class="modal-input" placeholder="رابط الصورة">
 
     <select id="brand_id" class="modal-input"></select>
-
     <input id="category" class="modal-input" placeholder="القسم">
-
     <input id="description" class="modal-input" placeholder="وصف المنتج (اختياري)">
-
+    <input id="stock_qty" class="modal-input" placeholder="الكمية بالمخزون">
     <input id="discount_value" class="modal-input" placeholder="قيمة الخصم">
     <select id="discount_type" class="modal-input">
       <option value="none">بدون خصم</option>
@@ -199,13 +198,10 @@ th{background:#f1f1f1;font-weight:600;}
     <input id="edit_askon_code" class="modal-input">
     <input id="edit_intl_code" class="modal-input">
     <input id="edit_image_url" class="modal-input">
-
     <select id="edit_brand_id" class="modal-input"></select>
-
     <input id="edit_category" class="modal-input">
-
     <input id="edit_description" class="modal-input" placeholder="الوصف">
-
+    <input id="edit_stock_qty" class="modal-input" placeholder="الكمية بالمخزون">
     <input id="edit_discount_value" class="modal-input">
     <select id="edit_discount_type" class="modal-input">
       <option value="none">بدون خصم</option>
@@ -439,13 +435,11 @@ function renderTable(){
 
   <!-- القسم -->
   <td>${p.category || "-"}</td>
-
   <!-- أسكون -->
   <td>${p.askon_code || "-"}</td>
-
   <!-- الدولي -->
   <td>${p.intl_code || "-"}</td>
-
+  <td>${p.stock_qty}</td>
   <!-- إجراءات -->
   <td>
     <button class="btn-light" onclick="openEditModal(${p.id})">تعديل</button>
