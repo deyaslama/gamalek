@@ -2288,8 +2288,8 @@ function makeProductCard(p){
         <img class="product-img"
      src="${safeImageURL(p.image_url)}"
      onerror="this.src='https://via.placeholder.com/200?text=No+Image'"
-     onclick="${outOfStock ? '' : `go('product', ${p.id})`}"
-     style="filter:${outOfStock ? 'grayscale(100%) opacity(40%)' : 'none'};" />
+     onclick="${p.stock_qty > 0 ? `go('product', ${p.id})` : ''}"
+     style="filter:${p.stock_qty > 0 ? 'none' : 'grayscale(100%) opacity(40%)'};" />
       </div>
 
       <!-- اسم المنتج -->
@@ -3799,6 +3799,7 @@ function printInvoice() {
 
 </body>
 </html>
+
 
 
 
