@@ -1453,6 +1453,26 @@ header{
 
   </div>
 </section>
+<section id="page-privacy" class="page">
+  <div class="container" style="padding:25px;max-width:900px;margin:auto;">
+    <h2 class="section-title">سياسة الخصوصية</h2>
+
+    <div id="privacyContent" 
+         style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+      سيتم تحميل المحتوى من لوحة التحكم...
+    </div>
+  </div>
+</section>
+<section id="page-terms" class="page">
+  <div class="container" style="padding:25px;max-width:900px;margin:auto;">
+    <h2 class="section-title">شروط الاستخدام</h2>
+
+    <div id="termsContent"
+         style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+      سيتم تحميل المحتوى من لوحة التحكم...
+    </div>
+  </div>
+</section>
 
 </div>
 
@@ -1472,6 +1492,8 @@ header{
       <p><a href="#" onclick="go('products')">المنتجات</a></p>
       <p><a href="#" onclick="go('brands')">الماركات</a></p>
       <p><a href="#" onclick="go('track')">تتبع الطلب</a></p>
+	  <p><a href="#" onclick="go('privacy')">سياسة الخصوصية</a></p>
+      <p><a href="#" onclick="go('terms')">شروط الاستخدام</a></p>
     </div>
 
     <div>
@@ -1541,7 +1563,8 @@ function go(page, data = null) {
   // 🔥 إغلاق السلة تلقائياً عند الذهاب لتسجيل الدخول
   if(page === "login") closeCart();
   // تحميل بيانات حسب الصفحة
-
+if (page === "privacy") loadStaticPage("privacy");
+if (page === "terms") loadStaticPage("terms");
   if (page === "home") loadHome();
   if (page === "products") loadAllProducts();
   if (page === "product") loadProductDetails(data);
@@ -3691,6 +3714,18 @@ function showAddSpinner(id){
     btn.disabled = false;
   }, 500);
 }
+async function loadStaticPage(type){
+  const res = await fetch(API + "/api/static/" + type);
+  const data = await res.json();
+
+  if(type === "privacy"){
+    document.getElementById("privacyContent").innerHTML = data.content || "لا يوجد محتوى بعد.";
+  }
+
+  if(type === "terms"){
+    document.getElementById("termsContent").innerHTML = data.content || "لا يوجد محتوى بعد.";
+  }
+}
 
 function showProductSpinner(id){
   const btn = document.getElementById("productAddBtn");
@@ -3895,3 +3930,4 @@ function printInvoice() {
 
 </body>
 </html>
+
