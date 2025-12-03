@@ -7,33 +7,6 @@
 
 <!-- سيتم دمج كل CSS القديم هنا لاحقًا -->
 <style>
-	.loading-spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid white;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin .7s linear infinite;
-  margin: auto;
-}
-.add-cart.loading {
-  background:#8a004a !important;
-  color:white !important;
-}
-
-.add-cart .spinner {
-  width:16px;
-  height:16px;
-  border:2px solid white;
-  border-top-color:transparent;
-  border-radius:50%;
-  margin:auto;
-  animation:spin .7s linear infinite;
-}
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 .profile-container {
   padding: 20px;
   font-family: 'Cairo', sans-serif;
@@ -2251,45 +2224,6 @@ function safeNum(n){
 
 
 async function loadHome(){
-// وضع سكيليتون مؤقت في الصفحة الرئيسية قبل تحميل المنتجات
-const featuredGrid = document.getElementById("featuredGrid");
-const discountGrid = document.getElementById("discountGrid");
-
-// شكل كارت سكيليتون واحد
-const skeletonCard = `
-  <div style="
-    background:#fff;
-    border-radius:16px;
-    padding:12px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.08);
-  ">
-    <div style="
-      width:100%;
-      height:160px;
-      background:#e4e4e4;
-      border-radius:12px;
-      animation:pulse 1.4s infinite;
-    "></div>
-
-    <div style="height:14px;background:#e4e4e4;border-radius:8px;margin-top:10px;width:80%;animation:pulse 1.4s infinite;"></div>
-    <div style="height:14px;background:#e4e4e4;border-radius:8px;margin-top:8px;width:60%;animation:pulse 1.4s infinite;"></div>
-  </div>
-`;
-
-// نكرر 6 مرات
-featuredGrid.innerHTML = skeletonCard.repeat(6);
-discountGrid.innerHTML = skeletonCard.repeat(6);
-
-// حركة السكيليتون
-const style = document.createElement("style");
-style.innerHTML = `
-@keyframes pulse {
-  0% { opacity:.6; }
-  50% { opacity:1; }
-  100% { opacity:.6; }
-}
-`;
-document.head.appendChild(style);
 
   // تحميل الماركات
   const brandsRes = await fetch(API + "/api/admin/brands");
@@ -2317,6 +2251,7 @@ document.head.appendChild(style);
     });
 
   // ==================== المنتجات المميزة ====================
+  const featuredGrid = document.getElementById("featuredGrid");
   featuredGrid.innerHTML = "";
 
   products
@@ -2327,7 +2262,7 @@ document.head.appendChild(style);
     });
 
   // ==================== العروض (خصومات) ====================
-  
+  const discountGrid = document.getElementById("discountGrid");
   discountGrid.innerHTML = "";
 
   products
@@ -2487,74 +2422,60 @@ function closeCart(){
   document.getElementById("cartPanel").style.right = "-350px";
 }
 
-async function addToCart(id) {
+async function addToCart(id){
 
-  const btn = document.getElementById(`cart-btn-${id}`);
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = `<div class="spinner"></div>`;
-    btn.classList.add("loading");
-  }
-
-  // تحميل المنتجات مرة واحدة فقط
-  if (!window.productsCache) {
+  // تحميل المنتجات من API مرة واحدة
+  if(!window.productsCache){
     const res = await fetch(API + "/api/admin/products");
     window.productsCache = await res.json();
   }
 
   const p = window.productsCache.find(x => x.id == id);
-  if (!p) return;
+  if(!p) return;
 
-  // المنتج موجود بالفعل في السلة؟
+  // هل المنتج موجود
   let item = cart.find(x => x.id == id);
-  if (item) {
+  if(item){
+    const p = window.productsCache.find(x => x.id == id);
 
-    // **قبل الزيادة تحقق من المخزون**
-    if (item.qty + 1 > p.stock_qty) {
+if (item.qty + 1 > p.stock_qty) {
+    alert("لا يمكن إضافة أكثر من الكمية المتوفرة في المخزون (" + p.stock_qty + ")");
+    return;
+}
 
-      alert("لا يمكن إضافة أكثر من الكمية المتوفرة (" + p.stock_qty + ")");
-
-      // 🔥 إيقاف اللودر فوراً
-      if (btn) {
-        btn.disabled = false;
-        btn.innerText = `مضاف للسلة +${item.qty}`;
-        btn.classList.remove("loading");
-      }
-      return;
-    }
-
-    item.qty++;
+item.qty++;
 
   } else {
+    // حسابات الأسعار
+let base = parseFloat(p.base_price) || 0;
+let discountValue = parseFloat(p.discount_value) || 0;
+let discountType = p.discount_type;
 
-    // حساب السعر
-    let base = parseFloat(p.base_price) || 0;
-    let discountValue = parseFloat(p.discount_value) || 0;
-    let discountType = p.discount_type;
+let priceAfterDiscount = base;
 
-    let priceAfterDiscount = base;
-
-    if (discountValue > 0) {
-      if (discountType === "percent") {
+if (discountValue > 0) {
+    if (discountType === "percent") {
         priceAfterDiscount = base - (base * (discountValue / 100));
-      } else if (discountType === "fixed") {
+    } else if (discountType === "fixed") {
         priceAfterDiscount = base - discountValue;
-      }
     }
+}
 
-    let priceWithVat = priceAfterDiscount * 1.15;
+let priceWithVat = priceAfterDiscount * 1.15;
 
-    item = {
-      id: p.id,
-      name: p.name,
-      qty: 1,
-      max_qty: p.stock_qty,
-      image: p.image_url,
-      base_price: base,
-      price_after_discount: priceAfterDiscount.toFixed(2),
-      price_with_vat: priceWithVat.toFixed(2),
-      total: priceWithVat.toFixed(2)
-    };
+item = {
+    id: p.id,
+    name: p.name,
+    qty: 1,
+	max_qty: p.stock_qty,
+    image: p.image_url,
+
+    // مهم جداً — يُرسل إلى الطلب وإلى orders.html
+    base_price: base,
+    price_after_discount: priceAfterDiscount.toFixed(2),
+    price_with_vat: priceWithVat.toFixed(2),
+    total: priceWithVat.toFixed(2)   // للقطعة الواحدة
+};
 
     cart.push(item);
   }
@@ -2564,22 +2485,19 @@ async function addToCart(id) {
   updateCartIcon();
   refreshCurrentPage();
 
-  // **تحديث حالة زر السلة**
-  if (btn) {
-    btn.disabled = false;
+
+  // تحديث زر الكرت للمنتج
+  const btn = document.getElementById(`cart-btn-${id}`);
+  if(btn){
     btn.innerText = `مضاف للسلة +${item.qty}`;
     btn.style.background = "#8a004a";
     btn.style.color = "#fff";
-    btn.classList.remove("loading");
     btn.classList.add("added");
   }
 
   // تحديث زر صفحة المنتج
   updateProductPageButton(id);
 }
-
-
-
 
 
 
@@ -3916,8 +3834,3 @@ function printInvoice() {
 
 </body>
 </html>
-
-
-
-
-
