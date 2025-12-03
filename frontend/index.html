@@ -16,7 +16,20 @@
   animation: spin .7s linear infinite;
   margin: auto;
 }
+.add-cart.loading {
+  background:#8a004a !important;
+  color:white !important;
+}
 
+.add-cart .spinner {
+  width:16px;
+  height:16px;
+  border:2px solid white;
+  border-top-color:transparent;
+  border-radius:50%;
+  margin:auto;
+  animation:spin .7s linear infinite;
+}
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -2473,19 +2486,17 @@ function closeCart(){
   document.getElementById("cartOverlay").style.display = "none";
   document.getElementById("cartPanel").style.right = "-350px";
 }
-
 async function addToCart(id){
 
-  // ========== 1) تجهيز الزر ==========
+  // 🟣 1) تغيير شكل زر المنتج فقط
   const btn = document.getElementById(`cart-btn-${id}`);
-  if(btn){
+  if (btn) {
       btn.disabled = true;
-      btn.innerHTML = `<div class="loading-spinner"></div>`;
-      btn.style.background = "#8a004a";
-      btn.style.color = "#fff";
+      btn.innerHTML = `<div class="spinner"></div>`;
+      btn.classList.add("loading");
   }
 
-  // ========== 2) تحميل المنتجات للمرة الأولى ==========
+  // 🟣 2) تحميل المنتجات إذا لم تكن موجودة
   if(!window.productsCache){
     const res = await fetch(API + "/api/admin/products");
     window.productsCache = await res.json();
@@ -2494,91 +2505,66 @@ async function addToCart(id){
   const p = window.productsCache.find(x => x.id == id);
   if(!p) return;
 
-  // ========== 3) هل المنتج موجود في السلة؟ ==========
+  // 🟣 3) هل المنتج موجود سابقًا في السلة؟
   let item = cart.find(x => x.id == id);
   if(item){
-
-    // منع تجاوز المخزون
-    if(item.qty + 1 > p.stock_qty){
-      alert("لا يمكن إضافة أكثر من المخزون المتوفر (" + p.stock_qty + ")");
-      
-      // رجّع الزر لطبيعته
-      if(btn){
-          btn.innerHTML = "أضف للسلة";
+      if (item.qty + 1 > p.stock_qty) {
+          alert("لا يمكن إضافة أكثر من الكمية المتوفرة (" + p.stock_qty + ")");
           btn.disabled = false;
+          updateProductPageButton(id);
+          return;
       }
-      return;
-    }
+      item.qty++;
+  }
+  else {
+      let base = parseFloat(p.base_price) || 0;
+      let discountValue = parseFloat(p.discount_value) || 0;
+      let discountType = p.discount_type;
 
-    // زيادة الكمية
-    item.qty++;
+      let priceAfterDiscount = base;
 
-  } else {
-
-    // ========== 4) حساب السعر ==========
-    let base = parseFloat(p.base_price) || 0;
-    let discountValue = parseFloat(p.discount_value) || 0;
-    let discountType = p.discount_type;
-
-    let priceAfterDiscount = base;
-
-    if(discountValue > 0){
-      if(discountType === "percent"){
-        priceAfterDiscount = base - (base * (discountValue / 100));
-      } 
-      else if(discountType === "fixed"){
-        priceAfterDiscount = base - discountValue;
+      if (discountValue > 0) {
+          if (discountType === "percent") {
+              priceAfterDiscount = base - (base * (discountValue / 100));
+          } else if (discountType === "fixed") {
+              priceAfterDiscount = base - discountValue;
+          }
       }
-    }
 
-    let priceWithVat = priceAfterDiscount * 1.15;
+      let priceWithVat = priceAfterDiscount * 1.15;
 
-    // ========== 5) إنشاء العنصر الجديد ==========
-    item = {
-      id: p.id,
-      name: p.name,
-      qty: 1,
-      max_qty: p.stock_qty,
-      image: p.image_url,
+      item = {
+          id: p.id,
+          name: p.name,
+          qty: 1,
+          max_qty: p.stock_qty,
+          image: p.image_url,
+          base_price: base,
+          price_after_discount: priceAfterDiscount.toFixed(2),
+          price_with_vat: priceWithVat.toFixed(2),
+          total: priceWithVat.toFixed(2),
+      };
 
-      base_price: base,
-      price_after_discount: priceAfterDiscount.toFixed(2),
-      price_with_vat: priceWithVat.toFixed(2),
-      total: priceWithVat.toFixed(2)
-    };
-
-    cart.push(item);
+      cart.push(item);
   }
 
-  // ========== 6) حفظ وتحديث ==========
+  // 🟣 4) تحديث السلة
   saveCart();
   renderCart();
   updateCartIcon();
   refreshCurrentPage();
 
-
-  // ========== 7) تغيير شكل الزر بعد الإضافة ==========
+  // 🟣 5) إرجاع الزر لوضع "مضاف للسلة"
   if(btn){
-      setTimeout(() => {
-
-          btn.innerHTML = `✔ تمت إضافته`;
-          btn.style.background = "#4CAF50";
-          btn.style.color = "#fff";
-
-          // رجوع الزر لطبيعته بعد 1.2 ثانية
-          setTimeout(() => {
-              btn.innerHTML = `أضف للسلة`;
-              btn.style.background = "";
-              btn.style.color = "";
-              btn.disabled = false;
-          }, 1200);
-
-      }, 400); // زمن اللودر
+      btn.disabled = false;
+      btn.innerText = `مضاف للسلة +${item.qty}`;
+      btn.classList.remove("loading");
   }
 
-  // زر صفحة المنتج
+  // زر صفحة التفاصيل
   updateProductPageButton(id);
 }
+
 
 
 
@@ -3916,6 +3902,7 @@ function printInvoice() {
 
 </body>
 </html>
+
 
 
 
