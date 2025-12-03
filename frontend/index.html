@@ -2244,7 +2244,7 @@ function makeProductCard(p){
   const isFav = wishlist.includes(p.id);
 
   return `
-    <div class="product-card" style="position:relative;">
+    <div class="product-card" style="position:relative;" onclick="go('product', ${p.id})">
 
       <!-- زر القلب في أعلى الكارت -->
       <div onclick="event.stopPropagation(); toggleWishlist(${p.id});"
@@ -3799,6 +3799,7 @@ function printInvoice() {
 
 </body>
 </html>
+
 
 
 
