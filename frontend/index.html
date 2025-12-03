@@ -2395,11 +2395,12 @@ ${
   p.stock_qty > 0
   ? `
       <button 
-        id="cart-btn-${p.id}"
-        onclick="event.stopPropagation(); addToCart(${p.id})"
-        class="add-cart">
-        أضف للسلة
-      </button>
+  id="cart-btn-${p.id}"
+  onclick="event.stopPropagation(); clickAddToCart(${p.id})"
+  class="add-cart">
+  أضف للسلة
+</button>
+
     `
   : `
       <button 
@@ -3713,6 +3714,10 @@ function showProductSpinner(id){
     btn.disabled = false;
   }, 500);
 }
+function clickAddToCart(id) {
+  showAddSpinner(id); // اللودر الصحيح
+  addToCart(id);      // إضافة المنتج
+}
 
 window.onload = async () => {
   await loadProductsCache();   // ← مهم جداً
@@ -3895,4 +3900,5 @@ function printInvoice() {
 
 </body>
 </html>
+
 
