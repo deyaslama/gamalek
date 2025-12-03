@@ -1693,6 +1693,41 @@ function calculateFinalPrice(p){
 // ======================= صفحة التفاصيل =======================
 // ======================= صفحة التفاصيل =======================
 async function loadProductDetails(id) {
+// 🟣 Skeleton Loader — يمنع ظهور المنتج السابق
+document.getElementById("productDetailsBox").innerHTML = `
+  <div style="display:flex;gap:20px;flex-wrap:wrap;">
+
+    <!-- صورة رمادية -->
+    <div style="flex:1;min-width:260px;">
+      <div style="
+        width:100%;
+        height:320px;
+        background:#e4e4e4;
+        border-radius:16px;
+        animation:pulse 1.4s infinite;">
+      </div>
+    </div>
+
+    <!-- معلومات رمادية -->
+    <div style="flex:2;min-width:260px;">
+      <div style="height:28px;background:#e4e4e4;border-radius:8px;width:70%;margin-bottom:15px;animation:pulse 1.4s infinite;"></div>
+      <div style="height:20px;background:#e4e4e4;border-radius:8px;width:40%;margin-bottom:10px;animation:pulse 1.4s infinite;"></div>
+      <div style="height:20px;background:#e4e4e4;border-radius:8px;width:90%;margin-bottom:10px;animation:pulse 1.4s infinite;"></div>
+      <div style="height:20px;background:#e4e4e4;border-radius:8px;width:80%;margin-bottom:10px;animation:pulse 1.4s infinite;"></div>
+
+      <div style="height:45px;background:#e4e4e4;border-radius:10px;width:150px;margin-top:25px;animation:pulse 1.4s infinite;"></div>
+    </div>
+
+  </div>
+
+  <style>
+    @keyframes pulse {
+      0% { opacity:.6; }
+      50% { opacity:1; }
+      100% { opacity:.6; }
+    }
+  </style>
+`;
 
   // ⭐ إصلاح قفز الصفحة للأسفل
   window.scrollTo(0, 0);
@@ -3799,6 +3834,7 @@ function printInvoice() {
 
 </body>
 </html>
+
 
 
 
