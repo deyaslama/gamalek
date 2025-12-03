@@ -209,6 +209,15 @@ app.post("/api/reset-password", (req, res) => {
 
 // --------------------------- CREATE TABLES --------------------------- //
 db.serialize(() => {
+  // جدول الصفحات الثابتة (سياسة الخصوصية – الشروط)
+db.run(`
+  CREATE TABLE IF NOT EXISTS static_pages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT UNIQUE, 
+    content TEXT
+  )
+`);
+
   // Brands
   db.run(`
     CREATE TABLE IF NOT EXISTS brands (
@@ -771,11 +780,59 @@ app.put("/api/orders/:id/status", (req, res) => {
     res.json({ success: true });
   });
 });
+app.get("/api/static/:type", (req, res) => {
+  const type = req.params.type;
+
+  db.get("SELECT content FROM static_pages WHERE type=?", [type], (err, row) => {
+    if (err) return res.json({ error: true });
+
+    res.json({ content: row ? row.content : "" });
+  });
+});
+app.get("/api/static/all", (req, res) => {
+  db.all("SELECT type, content FROM static_pages", (err, rows) => {
+    if (err) return res.json({ error: true });
+
+    const out = { privacy: "", terms: "" };
+
+    rows.forEach(r => {
+      out[r.type] = r.content;
+    });
+
+    res.json(out);
+  });
+});
+app.post("/api/static/update", (req, res) => {
+  const { privacy, terms } = req.body;
+
+  // تحديث أو إدخال بيانات سياسة الخصوصية
+  db.run(
+    `
+    INSERT INTO static_pages (type, content)
+    VALUES ('privacy', ?)
+    ON CONFLICT(type) DO UPDATE SET content=excluded.content
+    `,
+    [privacy]
+  );
+
+  // تحديث أو إدخال بيانات الشروط
+  db.run(
+    `
+    INSERT INTO static_pages (type, content)
+    VALUES ('terms', ?)
+    ON CONFLICT(type) DO UPDATE SET content=excluded.content
+    `,
+    [terms]
+  );
+
+  res.json({ success: true });
+});
 
 // --------------------------- START SERVER --------------------------- //
 app.listen(PORT, () =>
   console.log("✔ Server running at http://localhost:" + PORT)
 );
+
 
 
 
