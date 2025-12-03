@@ -2049,7 +2049,14 @@ async function doLogin(){
 
   const data = await res.json();
 
-  if(!data.success){
+  if (!data.success) {
+
+    if (data.verify === true) {
+        localStorage.setItem("pending_phone", phone);
+        document.getElementById("vPhone").value = phone;
+        go("verify");
+        return;
+    }
     loginMsg.innerText = "❌ " + data.message;
     return;
   }
@@ -3788,6 +3795,7 @@ function printInvoice() {
 
 </body>
 </html>
+
 
 
 
