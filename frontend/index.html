@@ -1627,6 +1627,13 @@ function fillBrandSelect(){
 function renderProducts(list){
   const grid = document.getElementById("productsPageGrid");
   grid.innerHTML = "";
+	// ⭐ ترتيب المنتجات حسب توفر المخزون
+list.sort((a, b) => {
+  if (a.stock_qty == 0 && b.stock_qty > 0) return 1;
+  if (a.stock_qty > 0 && b.stock_qty == 0) return -1;
+  return 0;
+});
+
 
   if(list.length === 0){
     grid.innerHTML = "<p>لا يوجد منتجات</p>";
@@ -2268,6 +2275,7 @@ function makeProductCard(p){
 
         <!-- الصورة -->
         <img class="product-img"
+		     style="${p.stock_qty == 0 ? 'filter:grayscale(100%);opacity:0.5;' : ''}"
              src="${safeImageURL(p.image_url)}"
              onerror="this.src='https://via.placeholder.com/200?text=No+Image'"
              onclick="go('product', ${p.id})"/>
@@ -2322,12 +2330,27 @@ ${(() => {
       </div>
 
       <!-- زر السلة -->
+      <!-- زر السلة حسب المخزون -->
+${
+  p.stock_qty > 0
+  ? `
       <button 
         id="cart-btn-${p.id}"
         onclick="event.stopPropagation(); addToCart(${p.id})"
         class="add-cart">
         أضف للسلة
       </button>
+    `
+  : `
+      <button 
+        disabled
+        class="add-cart"
+        style="background:#999;cursor:not-allowed;">
+        الكمية منتهية
+      </button>
+    `
+}
+
 
     </div>
   `;
@@ -2367,7 +2390,15 @@ async function addToCart(id){
   // هل المنتج موجود
   let item = cart.find(x => x.id == id);
   if(item){
-    item.qty++;
+    const p = window.productsCache.find(x => x.id == id);
+
+if (item.qty + 1 > p.stock_qty) {
+    alert("لا يمكن إضافة أكثر من الكمية المتوفرة في المخزون (" + p.stock_qty + ")");
+    return;
+}
+
+item.qty++;
+
   } else {
     // حسابات الأسعار
 let base = parseFloat(p.base_price) || 0;
@@ -2390,6 +2421,7 @@ item = {
     id: p.id,
     name: p.name,
     qty: 1,
+	max_qty: p.stock_qty
     image: p.image_url,
 
     // مهم جداً — يُرسل إلى الطلب وإلى orders.html
@@ -2441,7 +2473,10 @@ function removeItem(id){
 function changeQty(id, q){
   const item = cart.find(x => x.id == id);
   if(!item) return;
-
+if(q > 0 && item.qty + 1 > item.max_qty){
+    alert("لا يمكن تجاوز المخزون المتوفر (" + item.max_qty + ")");
+    return;
+}
   item.qty += q;
 
   if(item.qty <= 0){
@@ -3151,6 +3186,11 @@ localStorage.setItem("orders", JSON.stringify(dashboardOrders));
 function changeQtyCheckout(id, amount){
   let item = cart.find(p => p.id == id);
   if(!item) return;
+	let p = window.productsCache.find(x => x.id == item.id);
+if(amount > 0 && item.qty + 1 > p.stock_qty){
+    alert("لا يمكن تجاوز المخزون المتوفر (" + p.stock_qty + ")");
+    return;
+}
 
   item.qty += amount;
   if(item.qty <= 0){
@@ -3748,6 +3788,7 @@ function printInvoice() {
 
 </body>
 </html>
+
 
 
 
