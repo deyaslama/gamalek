@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>إدارة الطلبات</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body { font-family:'Cairo', sans-serif; background:#f2f4f7; margin:0; padding:20px; margin-right: 25px; padding: 25px; }
+
+/* ======================= جدول الطلبات ======================= */
+.orders-table-box { background:white; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.08); overflow:hidden; }
+.orders-table { width:100%; border-collapse:collapse; }
+.orders-table th { background:#7a004b; color:white; padding:14px 10px; font-size:15px; }
+.orders-table td { padding:12px 10px; text-align:center; border-bottom:1px solid #eee; font-size:14px; }
+
+.view-btn {
+  background:#00a6ff; color:white; padding:7px 14px; border:none;
+  border-radius:8px; cursor:pointer;
+}
+.view-btn:hover { opacity:0.85; }
+
+.print-btn { background:#0288d1; color:white; padding:7px 10px; border:none; border-radius:8px; cursor:pointer; }
+
+.status-badge { padding:6px 10px; border-radius:8px; font-size:13px; color:white; display:inline-block; }
+.status-new { background:#e91e63; }
+.status-processing { background:#ff9800; }
+.status-delivery { background:#0288d1; }
+.status-done { background:#4caf50; }
+.status-canceled { background:#b71c1c; }
+
+/* ======================= نافذة التفاصيل ======================= */
+.popup { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:none; justify-content:center; align-items:center; z-index:9999; }
+.popup-box { background:white; width:90%; max-width:800px; max-height:85vh; overflow-y:auto; border-radius:16px; padding:20px; animation:fadeIn 0.25s; }
+@keyframes fadeIn { from{opacity:0; transform:scale(.95);} to{opacity:1; transform:scale(1);} }
+
+h2 { color:#065f6a; text-align:center; }
+
+.items-table { width:100%; border-collapse:collapse; margin-top:15px; }
+.items-table th { background:#065f6a; color:white; padding:10px; font-size:14px; }
+.items-table td { padding:10px; border-bottom:1px solid #ddd; }
+.items-table img { width:55px; height:55px; object-fit:cover; border-radius:8px; }
+
+/* أزرار الحالة */
+.status-buttons button {
+  background:#e91e63; color:white; padding:7px 14px;
+  border:none; border-radius:8px; cursor:pointer;
+  margin:4px 2px; transition:0.25s;
+}
+.status-buttons button.active { background:#065f6a !important; }
+
+.close-btn {
+  background:#065f6a; color:white; padding:10px; width:100%;
+  border:none; border-radius:10px; margin-top:15px; cursor:pointer;
+}
+
+@media print {
+  body * { visibility:hidden; }
+  #invoiceArea, #invoiceArea * { visibility:visible; }
+  #invoiceArea { position:absolute; top:0; left:0; right:0; }
+}
+</style>
+</head>
+
+<body>
+
+<h1 style="text-align:center;color:#065f6a;margin-bottom:20px;">📦 إدارة الطلبات</h1>
+
+<audio id="notifSound">
+  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+</audio>
+
+<div class="orders-table-box">
+<table class="orders-table">
+<thead>
+<tr>
+<th>رقم</th>
+<th>الاسم</th>
+<th>الجوال</th>
+<th>التاريخ</th>
+<th>الحالة / طباعة</th>
+<th>عرض</th>
+</tr>
+</thead>
+<tbody id="ordersBody"></tbody>
+</table>
+</div>
+
+<!-- نافذة التفاصيل -->
+<div class="popup" id="popup">
+  <div class="popup-box" id="popupBox"></div>
+</div>
+
+<script>
+const API = "https://gamalek.onrender.com";
+let ALL = [];
+let CURRENT_ORDER = null;
+let lastOrderId = null;
+
+
+
+// لو دخلنا من صفحة العملاء → فلترة حسب رقم العميل
+const urlParams = new URLSearchParams(location.search);
+const filterPhone = urlParams.get("phone");
+
+/* ------------------ دالة الصور ------------------ */
+function safeImageURL(url) {
+  if (!url) return "/uploads/default.png";
+  url = url.trim();
+
+  if (url.includes("drive.google.com")) {
+    const id = url.match(/[-\w]{25,}/);
+    return id ? `https://lh3.googleusercontent.com/d/${id[0]}` : url;
+  }
+
+  if (url.includes("lh3.googleusercontent.com")) return url;
+
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+
+  return url;
+}
+
+/* ------------------ تحميل الطلبات ------------------ */
+async function loadOrders() {
+  const res = await fetch(API + "/api/orders");
+  ALL = await res.json();
+  renderOrders();
+
+  if (ALL.length > 0) {
+    let newest = ALL[0].id;
+    if (lastOrderId !== null && newest > lastOrderId) {
+      document.getElementById("notifSound").play();
+    }
+    lastOrderId = newest;
+  }
+}
+
+function renderOrders() {
+  const box = document.getElementById("ordersBody");
+  box.innerHTML = "";
+
+if(filterPhone){
+  ALL = ALL.filter(o => o.customer_phone == filterPhone);
+}
+
+
+  ALL.forEach(o => {
+    box.innerHTML += `
+    <tr>
+      <td>${o.id}</td>
+      <td>${o.customer_name}</td>
+      <td>${o.customer_phone}</td>
+      <td>${o.date}</td>
+
+      <td>
+        <span class="status-badge ${statusClass(o.status)}">${statusText(o.status)}</span>
+        ${
+          (o.status === "delivery" || o.status === "done")
+          ? `<button class="print-btn" onclick="directPrint(${o.id})">🧾</button>`
+          : ""
+        }
+      </td>
+
+      <td><button class="view-btn" onclick="openOrder(${o.id})">عرض</button></td>
+    </tr>`;
+  });
+}
+
+function statusClass(s){ return {
+  new:"status-new",
+  processing:"status-processing",
+  delivery:"status-delivery",
+  done:"status-done",
+  canceled:"status-canceled"
+}[s];}
+
+function statusText(s){ return {
+  new:"جديد",
+  processing:"قيد التجهيز",
+  delivery:"خرج للتوصيل",
+  done:"مكتمل",
+  canceled:"ملغي"
+}[s];}
+
+/* ------------------ فتح التفاصيل ------------------ */
+async function openOrder(id){
+
+  const fullItems = await fetch(API + "/api/order_items_full/" + id).then(r=>r.json());
+  const base = await fetch(API + "/api/orders/" + id).then(r=>r.json());
+  console.log("🟢 ORDER RECEIVED:", base);
+console.log("🟣 ITEMS RECEIVED:", fullItems);
+
+
+  CURRENT_ORDER = { order: base.order, items: fullItems };
+
+  let o = base.order;
+  let items = fullItems;
+
+  let html = `
+  <h2>تفاصيل الطلب رقم ${o.id}</h2>
+
+  <h3>بيانات العميل</h3>
+  <p><b>الاسم:</b> ${o.customer_name}</p>
+  <p><b>الجوال:</b> ${o.customer_phone}</p>
+  <p><b>جوال إضافي:</b> ${o.customer_phone2 || "—"}</p>
+  <p><b>العنوان:</b> ${o.customer_address || "—"}</p>
+  <p><b>الموقع:</b> ${o.customer_location ? `<a href="${o.customer_location}" target="_blank">فتح</a>` : "—"}</p>
+  <p><b>ملاحظات:</b> ${o.customer_notes || "—"}</p>
+
+  <h3>الأصناف</h3>
+
+    <table class="items-table">
+    <tr>
+      <th>الصورة</th>
+      <th>الاسم</th>
+      <th>ASKON</th>
+      <th>الدولي</th>
+      <th>السعر للحبة (بعد الضريبة)</th>
+      <th>الكمية</th>
+      <th>الإجمالي (بعد الضريبة)</th>
+    </tr>
+`;
+
+for (let i of items){
+
+// 1) السعر الأساسي
+// السعر بعد الخصم
+// السعر الأساسي
+let finalPrice = parseFloat(i.price_with_vat) || 0;
+let totalFinal = parseFloat(i.total) || 0;
+
+
+
+
+
+    html += `
+    <tr>
+      <td><img src="${safeImageURL(i.image_url)}"></td>
+      <td>${i.name}</td>
+      <td>${i.askon_code || "—"}</td>
+      <td>${i.intl_code || "—"}</td>
+<td>${finalPrice}</td>
+<td>${i.qty}</td>
+<td>${totalFinal}</td>
+
+
+    </tr>`;
+}
+
+
+
+
+  html += `
+  </table>
+
+<h3>
+  <b>الإجمالي بعد الخصم:</b>
+  <span style="color:#4caf50;font-weight:bold;">${o.total.toFixed(2)} ر.س</span>
+</h3>
+
+<h3>
+  <b>قيمة الشحن:</b>
+  <span style="font-weight:bold;">${o.shipping.toFixed(2)} ر.س</span>
+</h3>
+
+<h3>
+  <b>ضريبة الشحن (15%):</b>
+  <span style="font-weight:bold;">${o.shipping_vat.toFixed(2)} ر.س</span>
+</h3>
+
+<h2 style="color:#7a004b; margin-top:15px;">
+  <b>الإجمالي النهائي مع الشحن:</b>
+  <span>${o.total_with_shipping.toFixed(2)} ر.س</span>
+</h2>
+
+
+  <h3>تغيير الحالة</h3>
+  <div class="status-buttons">
+    ${statusButton(id,"new")}
+    ${statusButton(id,"processing")}
+    ${statusButton(id,"delivery")}
+    ${statusButton(id,"done")}
+    ${statusButton(id,"canceled")}
+  </div>
+
+  <button class="close-btn" onclick="closePopup()">إغلاق</button>
+  `;
+
+  document.getElementById("popupBox").innerHTML = html;
+  document.getElementById("popup").style.display = "flex";
+}
+
+function statusButton(id, st){
+  return `<button onclick="updateStatus(${id}, '${st}')" id="btn-${st}">${statusText(st)}</button>`;
+}
+
+function closePopup(){ document.getElementById("popup").style.display="none"; }
+
+function highlightActive(st){
+  document.querySelectorAll(".status-buttons button").forEach(btn => {
+    btn.classList.remove("active");
+  });
+  const btn = document.getElementById("btn-" + st);
+  if (btn) btn.classList.add("active");
+}
+
+/* ------------------ تحديث الحالة ------------------ */
+async function updateStatus(id, st){
+  await fetch(API + "/api/orders/" + id + "/status", {
+    method:"PUT",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ status:st })
+  });
+
+  highlightActive(st);
+  loadOrders();
+}
+
+/* ------------------ الطباعة المفصلة ------------------ */
+async function directPrint(id) {
+
+  const fullItems = await fetch(API + "/api/order_items_full/" + id).then(r => r.json());
+  const base = await fetch(API + "/api/orders/" + id).then(r => r.json());
+
+  let o = base.order;
+  let items = fullItems;
+
+  let totalBeforeDiscount = 0;
+let totalAfterDiscount = 0;
+let totalWithVat = 0;
+
+items.forEach(i => {
+
+  let base = parseFloat(i.base_price) * i.qty;
+  let afterDiscount = parseFloat(i.price_after_discount) * i.qty;
+  let withVat = parseFloat(i.total);
+
+  totalBeforeDiscount += base;
+  totalAfterDiscount += afterDiscount;
+  totalWithVat += withVat;
+});
+
+
+  // QR CODE DATA
+  const qrText = `Order: ${o.id}\nCustomer: ${o.customer_name}\nTotal: ${totalWithVat.toFixed(2)} SAR`;
+  const qrURL = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(qrText)}`;
+
+  let logoURL = "https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg";
+
+  let html = `
+  <div id="invoiceArea" style="font-family:Cairo; padding:20px; direction:rtl;">
+
+    <!-- Logo -->
+    <div style="text-align:center; margin-bottom:20px;">
+      <img src="${logoURL}" style="width:120px; height:120px; object-fit:contain;">
+    </div>
+
+    <h2 style="text-align:center;color:#065f6a;">فاتورة طلب رقم ${o.id}</h2>
+
+    <p><b>👤 اسم العميل:</b> ${o.customer_name}</p>
+    <p><b>📞 رقم الجوال:</b> ${o.customer_phone}</p>
+    <p><b>📍 العنوان:</b> ${o.customer_address}</p>
+    <p><b>📅 التاريخ:</b> ${o.date}</p>
+
+    <hr style="margin:20px 0;">
+
+    <h3 style="margin-bottom:10px;">تفاصيل الأصناف</h3>
+
+    <table style="width:100%; border-collapse:collapse; text-align:center; font-size:15px;">
+      <tr style="background:#065f6a; color:white;">
+  <th style="padding:10px;">الاسم</th>
+  <th style="padding:10px;">ASKON</th>
+  <th style="padding:10px;">الدولي</th>
+  <th style="padding:10px;">السعر الأساسي</th>
+  <th style="padding:10px;">الكمية</th>
+  <th style="padding:10px;">السعر بعد الخصم</th>
+  <th style="padding:10px;">السعر النهائي (بعد الضريبة)</th>
+</tr>`;
+
+  for (let i of items) {
+    
+
+    html += `
+      <tr style="background:#fafafa;">
+  <td style="padding:10px;">${i.name}</td>
+  <td style="padding:10px; text-align:center;">${i.askon_code || "—"}</td>
+  <td style="padding:10px; text-align:center;">${i.intl_code || "—"}</td>
+  <td style="padding:10px;">${(i.base_price * i.qty).toFixed(2)}</td>
+  <td style="padding:10px;">${i.qty}</td>
+  <td style="padding:10px;">${(i.price_after_discount * i.qty).toFixed(2)}</td>
+  <td style="padding:10px;">${i.total.toFixed(2)}</td>
+</tr>
+
+<tr><td colspan="7" style="height:12px;"></td></tr>
+    `;
+  }
+
+  html += `
+    </table>
+
+    <br><br>
+
+    <h3>الملخص المالي</h3>
+
+<p><b>✔ مجموع السعر قبل الخصم:</b> ${totalBeforeDiscount.toFixed(2)} ر.س</p>
+<p><b>✔ مجموع السعر بعد الخصم:</b> ${totalAfterDiscount.toFixed(2)} ر.س</p>
+<p><b>✔ الإجمالي النهائي (بعد الضريبة):</b> ${totalWithVat.toFixed(2)} ر.س</p>
+
+
+    <hr style="margin:25px 0;">
+
+    <h3 style="text-align:center;">رمز QR للفاتورة</h3>
+    <div style="text-align:center;">
+      <img src="${qrURL}" style="width:150px; height:150px;">
+    </div>
+
+  </div>`;
+
+  let win = window.open("", "_blank");
+  win.document.write(html);
+  win.print();
+  win.close();
+}
+
+
+
+/* ------------------ تشغيل ------------------ */
+loadOrders();
+setInterval(loadOrders, 4000);
+</script>
+
+</body>
+</html>
