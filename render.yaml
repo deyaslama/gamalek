@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: gamalek-store
+    env: node
+    plan: starter
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+    healthCheckPath: /
+    domains:
+      - gamalek.store
+      - www.gamalek.store
+
