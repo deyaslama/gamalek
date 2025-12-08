@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+<meta charset="UTF-8">
+<title>إدارة الطلبات</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body { font-family:'Cairo', sans-serif; background:#f2f4f7; margin:0; padding:20px; }
+
+.orders-table-box { background:white; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.08); overflow:hidden; }
+.orders-table { width:100%; border-collapse:collapse; }
+.orders-table th { background:#7a004b; color:white; padding:12px; font-size:15px; }
+.orders-table td { padding:12px; text-align:center; border-bottom:1px solid #eee; font-size:14px; }
+
+.view-btn { background:#00a6ff; color:white; padding:7px 14px; border:none; border-radius:8px; cursor:pointer; }
+.print-btn { background:#0288d1; color:white; padding:7px 10px; border:none; border-radius:8px; cursor:pointer; }
+
+.status-badge { padding:6px 10px; border-radius:8px; font-size:13px; color:white; display:inline-block; }
+.status-new { background:#e91e63; }
+.status-processing { background:#ff9800; }
+.status-delivery { background:#0288d1; }
+.status-done { background:#4caf50; }
+.status-canceled { background:#b71c1c; }
+
+.popup { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:none; justify-content:center; align-items:center; z-index:9999; }
+.popup-box { background:white; width:90%; max-width:800px; max-height:85vh; overflow-y:auto; border-radius:16px; padding:20px; }
+
+.items-table { width:100%; border-collapse:collapse; margin-top:15px; }
+.items-table th { background:#065f6a; color:white; padding:10px; }
+.items-table td { padding:10px; border-bottom:1px solid #ddd; }
+.items-table img { width:55px; height:55px; border-radius:8px; object-fit:cover; }
+
+.close-btn { background:#065f6a; color:white; padding:10px; width:100%; border:none; border-radius:10px; margin-top:15px; cursor:pointer; }
+
+@media print {
+  body * { visibility:hidden; }
+  #invoiceArea, #invoiceArea * { visibility:visible; }
+  #invoiceArea { position:absolute; top:0; left:0; right:0; }
+}
+</style>
+</head>
+
+<body>
+
+<h1 style="text-align:center;color:#065f6a;margin-bottom:20px;">📦 إدارة الطلبات</h1>
+
+<div class="orders-table-box">
+<table class="orders-table">
+<thead>
+<tr>
+<th>رقم</th>
+<th>الاسم</th>
+<th>الجوال</th>
+<th>التاريخ</th>
+<th>الحالة</th>
+<th>عرض</th>
+</tr>
+</thead>
+<tbody id="ordersBody"></tbody>
+</table>
+</div>
+
+<div class="popup" id="popup">
+  <div class="popup-box" id="popupBox"></div>
+</div>
+
+<script>
+const API = "http://localhost:3000";
+let ALL = [];
+
+/* ------------------ تحميل الطلبات ------------------ */
+async function loadOrders() {
+  const res = await fetch(API + "/api/orders");
+  ALL = await res.json();
+  renderOrders();
+}
+
+function renderOrders() {
+  const box = document.getElementById("ordersBody");
+  box.innerHTML = "";
+  ALL.forEach(o => {
+    box.innerHTML += `
+    <tr>
+      <td>${o.id}</td>
+      <td>${o.customer_name}</td>
+      <td>${o.customer_phone}</td>
+      <td>${o.date}</td>
+      <td>${statusText(o.status)}</td>
+      <td><button class="view-btn" onclick="openOrder(${o.id})">عرض</button></td>
+    </tr>`;
+  });
+}
+
+function statusText(s){
+  return {
+    new:"جديد",
+    processing:"قيد التجهيز",
+    delivery:"خرج للتوصيل",
+    done:"مكتمل",
+    canceled:"ملغي"
+  }[s];
+}
+
+/* ------------------ عرض التفاصيل ------------------ */
+async function openOrder(id){
+
+  const items = await fetch(API + "/api/order_items_full/" + id).then(r=>r.json());
+  const base  = await fetch(API + "/api/orders/" + id).then(r=>r.json());
+
+  let o = base.order;
+
+  let html = `
+  <h2>تفاصيل الطلب رقم ${o.id}</h2>
+
+  <h3>بيانات العميل</h3>
+  <p><b>الاسم:</b> ${o.customer_name}</p>
+  <p><b>الجوال:</b> ${o.customer_phone}</p>
+  <p><b>العنوان:</b> ${o.customer_address || "—"}</p>
+
+  <h3>الأصناف</h3>
+
+<table class="items-table">
+  <tr>
+    <th>الصورة</th>
+    <th>الاسم</th>
+    <th>ASKON</th>
+    <th>الدولي</th>
+    <th>السعر للحبة (بعد الضريبة والخصم)</th>
+    <th>الكمية</th>
+    <th>الإجمالي (بعد الضريبة والخصم)</th>
+  </tr>
+`;
+
+let grandTotal = 0;
+
+for (let i of items) {
+
+  let base = i.base_price || 0;
+  let discount = i.discount || 0;
+
+  let finalAfterDiscount = base - discount;
+  let finalAfterVat = finalAfterDiscount * 1.15;
+
+  let lineTotal = finalAfterVat * i.qty;
+
+  grandTotal += lineTotal;
+
+  html += `
+  <tr>
+    <td><img src="${i.image_url}"></td>
+    <td>${i.name}</td>
+    <td>${i.askon_code || "—"}</td>
+    <td>${i.intl_code || "—"}</td>
+    <td>${finalAfterVat.toFixed(2)}</td>
+    <td>${i.qty}</td>
+    <td>${lineTotal.toFixed(2)}</td>
+  </tr>`;
+}
+
+html += `
+</table>
+
+<h3 style="margin-top:20px;">
+  <b>الإجمالي النهائي:</b>
+  <span style="color:#e91e63">${grandTotal.toFixed(2)} ر.س</span>
+</h3>
+
+<button class="close-btn" onclick="closePopup()">إغلاق</button>
+`;
+
+  document.getElementById("popupBox").innerHTML = html;
+  document.getElementById("popup").style.display = "flex";
+}
+
+function closePopup(){
+  document.getElementById("popup").style.display="none";
+}
+
+loadOrders();
+</script>
+
+</body>
+</html>
