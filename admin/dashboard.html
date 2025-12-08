@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم – متجر التجميل</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Cairo', sans-serif;
+  background: #f4f7fb;
+  color: #333;
+}
+
+/* ===== الشريط الجانبي ===== */
+.sidebar {
+  width: 230px;
+  background: #006b6a;
+  height: 100vh;
+  position: fixed;
+  right: 0;
+  top: 0;
+  padding: 20px;
+  color: #fff;
+}
+
+.sidebar h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.nav-links a {
+  color: #fff;
+  padding: 10px;
+  border-radius: 6px;
+  transition: 0.3s;
+  font-size: 16px;
+   text-decoration: none;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  background: #009b9b;
+}
+
+/* ===== المحتوى ===== */
+.main {
+  margin-right: 25px;
+  padding: 25px;
+}
+
+.header {
+  background: #fff;
+  padding: 15px 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-name {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 15px;
+}
+
+.stat-card {
+  background: #fff;
+  padding: 18px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.stat-title {
+  font-size: 14px;
+  color: #6e6e6e;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: 8px;
+  color: #006b6a;
+}
+</style>
+</head>
+<body>
+
+<!-- ========== الشريط الجانبي ========== -->
+
+</div>
+
+<!-- ========== المحتوى الرئيسي ========== -->
+<div class="main">
+
+  <div class="header">
+    <span class="header-name">مرحبًا، ضياء 👋</span>
+    <span>إدارة المتجر بالكامل</span>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-title">عدد المنتجات</div>
+      <div class="stat-value" id="prodCount">0</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-title">الطلبات الجديدة</div>
+      <div class="stat-value" id="newOrders">0</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-title">طلبات قيد التجهيز</div>
+      <div class="stat-value" id="inProgress">0</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-title">مبيعات الشهر</div>
+      <div class="stat-value" id="monthSales">0 ر.س</div>
+    </div>
+    <div class="stat-card">
+  <div class="stat-title">طلبات خرجت للتوصيل</div>
+  <div class="stat-value" id="deliveryCount">0</div>
+</div>
+
+<div class="stat-card">
+  <div class="stat-title">طلبات مكتملة</div>
+  <div class="stat-value" id="completedCount">0</div>
+</div>
+
+  </div>
+
+</div>
+
+<script>
+
+async function loadStats() {
+
+  // جلب جميع الطلبات من السيرفر
+  const orders = await fetch("http://localhost:3000/api/orders")
+    .then(r => r.json());
+
+  // جلب عدد المنتجات من السيرفر
+  const prodStats = await fetch("http://localhost:3000/api/admin/products")
+    .then(r => r.json());
+
+  // عدد المنتجات
+  document.getElementById("prodCount").innerText = prodStats.length ?? 0;
+
+  // عدد الطلبات الجديدة
+  let newOrders = orders.filter(o => o.status === "new").length;
+
+  // عدد الطلبات قيد التجهيز
+  let processing = orders.filter(o => o.status === "processing").length;
+
+  // طلبات خرجت للتوصيل
+  let delivery = orders.filter(o => o.status === "delivery").length;
+
+  // الطلبات المكتملة
+  let completed = orders.filter(o => o.status === "done").length;
+
+  // إجمالي المبيعات (فقط المكتملة)
+  let monthSales = orders
+    .filter(o => o.status === "done")
+    .reduce((sum, o) => sum + Number(o.total), 0);
+
+  // عرض النتائج
+  document.getElementById("newOrders").innerText = newOrders;
+  document.getElementById("inProgress").innerText = processing;
+  document.getElementById("deliveryCount").innerText = delivery;
+  document.getElementById("completedCount").innerText = completed;
+  document.getElementById("monthSales").innerText = monthSales.toFixed(2) + " ر.س";
+}
+
+loadStats();
+
+</script>
+
+
+
+</body>
+</html>
