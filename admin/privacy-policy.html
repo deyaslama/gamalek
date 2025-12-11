@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سياسة الاستخدام والخصوصية – لوحة التحكم</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Cairo',sans-serif;
+  background:#f5f7fa;
+  color:#333;
+  margin:0;
+  padding:20px;
+}
+
+.main{
+  max-width:1200px;
+  margin:0 auto;
+  background:#fff;
+  padding:30px;
+  border-radius:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.08);
+}
+
+.header{
+  margin-bottom:30px;
+  padding-bottom:20px;
+  border-bottom:3px solid #065f6a;
+}
+
+.header h1{
+  color:#065f6a;
+  font-size:28px;
+  font-weight:700;
+}
+
+.editor-container{
+  margin-bottom:20px;
+}
+
+.editor-container label{
+  display:block;
+  margin-bottom:8px;
+  font-weight:600;
+  color:#065f6a;
+  font-size:16px;
+}
+
+.editor-container input,
+.editor-container textarea{
+  width:100%;
+  padding:12px;
+  border:2px solid #e0e0e0;
+  border-radius:8px;
+  font-size:14px;
+  font-family:'Cairo',sans-serif;
+  transition:all 0.3s ease;
+}
+
+.editor-container input:focus,
+.editor-container textarea:focus{
+  outline:none;
+  border-color:#065f6a;
+  box-shadow:0 0 0 4px rgba(6, 95, 106, 0.1);
+}
+
+.editor-container textarea{
+  min-height:400px;
+  resize:vertical;
+}
+
+.btn{
+  background:linear-gradient(135deg, #065f6a 0%, #0d7b86 100%);
+  color:#fff;
+  border:none;
+  padding:12px 24px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:16px;
+  font-weight:600;
+  transition:all 0.3s ease;
+  box-shadow:0 2px 8px rgba(6, 95, 106, 0.2);
+}
+
+.btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(6, 95, 106, 0.3);
+}
+
+.actions{
+  display:flex;
+  gap:12px;
+  margin-top:20px;
+}
+
+.preview{
+  margin-top:30px;
+  padding:20px;
+  background:#f8f9fa;
+  border-radius:8px;
+  border:2px solid #e0e0e0;
+}
+
+.preview h3{
+  color:#065f6a;
+  margin-bottom:15px;
+  font-size:20px;
+}
+
+.preview-content{
+  line-height:1.8;
+  color:#555;
+}
+</style>
+</head>
+<body>
+
+<div class="main">
+  <div class="header">
+    <h1>📋 سياسة الاستخدام والخصوصية</h1>
+  </div>
+
+  <div class="editor-container">
+    <label>العنوان:</label>
+    <input type="text" id="pageTitle" placeholder="عنوان الصفحة">
+  </div>
+
+  <div class="editor-container">
+    <label>المحتوى:</label>
+    <textarea id="pageContent" placeholder="اكتب محتوى سياسة الاستخدام والخصوصية هنا..."></textarea>
+  </div>
+
+  <div class="actions">
+    <button class="btn" onclick="saveContent()">💾 حفظ</button>
+    <button class="btn" onclick="loadContent()" style="background:linear-gradient(135deg, #6c757d 0%, #5a6268 100%);">🔄 تحديث</button>
+  </div>
+
+  <div class="preview">
+    <h3>معاينة:</h3>
+    <div class="preview-content" id="preview"></div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin;
+const PAGE_TYPE = "privacy";
+
+async function loadContent(){
+  try {
+    const res = await fetch(API + "/api/pages/" + PAGE_TYPE);
+    const data = await res.json();
+    
+    if(data.error){
+      alert("خطأ في تحميل المحتوى: " + data.error);
+      return;
+    }
+
+    document.getElementById("pageTitle").value = data.title || "";
+    document.getElementById("pageContent").value = data.content || "";
+    updatePreview();
+  } catch (error) {
+    console.error("خطأ:", error);
+    alert("حدث خطأ في تحميل المحتوى");
+  }
+}
+
+async function saveContent(){
+  const title = document.getElementById("pageTitle").value.trim();
+  const content = document.getElementById("pageContent").value.trim();
+
+  if(!title || !content){
+    alert("⚠️ يرجى ملء جميع الحقول");
+    return;
+  }
+
+  try {
+    const res = await fetch(API + "/api/admin/pages/" + PAGE_TYPE, {
+      method:"PUT",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ title, content })
+    });
+
+    const data = await res.json();
+    
+    if(data.success){
+      alert("✅ تم حفظ المحتوى بنجاح!");
+      updatePreview();
+    } else {
+      alert("❌ حدث خطأ أثناء الحفظ: " + (data.error || "خطأ غير معروف"));
+    }
+  } catch (error) {
+    console.error("خطأ:", error);
+    alert("❌ حدث خطأ في الاتصال بالسيرفر");
+  }
+}
+
+function updatePreview(){
+  const title = document.getElementById("pageTitle").value;
+  const content = document.getElementById("pageContent").value;
+  
+  document.getElementById("preview").innerHTML = `
+    <h2>${title || "عنوان الصفحة"}</h2>
+    <div>${content || "المحتوى..."}</div>
+  `;
+}
+
+// تحديث المعاينة عند الكتابة
+document.getElementById("pageTitle").addEventListener("input", updatePreview);
+document.getElementById("pageContent").addEventListener("input", updatePreview);
+
+// تحميل المحتوى عند فتح الصفحة
+loadContent();
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
