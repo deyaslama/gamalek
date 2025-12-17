@@ -1,0 +1,125 @@
+/* ===================== Footer ===================== */
+.footer{
+  background:linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+  margin-top:60px;
+  padding:30px 0 0;
+  border-top:3px solid #f2bfd7;
+  position:relative;
+  overflow:hidden;
+}
+
+.footer::before{
+  content:'';
+  position:absolute;
+  top:0;
+  right:0;
+  width:200px;
+  height:200px;
+  background:radial-gradient(circle, rgba(233, 30, 99, 0.05) 0%, transparent 70%);
+  border-radius:50%;
+}
+
+.footer-container{
+  width:94%;
+  max-width:1200px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:20px;
+  position:relative;
+  z-index:1;
+  align-items:start;
+}
+
+.footer-container > div{
+  padding:15px;
+}
+
+.footer-container h3{
+  color:#8a004a;
+  margin-bottom:12px;
+  font-size:18px;
+  font-weight:800;
+  position:relative;
+  padding-bottom:10px;
+}
+
+.footer-container h3::after{
+  content:'';
+  position:absolute;
+  bottom:0;
+  right:0;
+  width:50px;
+  height:3px;
+  background:linear-gradient(90deg, #E91E63 0%, #8a004a 100%);
+  border-radius:2px;
+}
+
+.footer-container p{
+  color:#666;
+  line-height:1.6;
+  margin:6px 0;
+  font-size:14px;
+}
+
+.footer-container a{
+  color:#666;
+  text-decoration:none;
+  transition:all 0.3s ease;
+  display:block;
+  padding:4px 0;
+  font-size:14px;
+}
+
+.footer-container a:hover{
+  color:#E91E63;
+  padding-right:8px;
+}
+
+.footer-bottom{
+  text-align:center;
+  padding:15px 0;
+  margin-top:20px;
+  background:linear-gradient(135deg, #fce4ef 0%, #ffeef5 100%);
+  color:#8a004a;
+  font-size:14px;
+  font-weight:600;
+  border-top:2px solid #f2bfd7;
+}
+
+/* Social media icons */
+.social-media-icons {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.social-media-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  font-size: 18px;
+}
+
+.social-media-icon:hover {
+  transform: scale(1.15) translateY(-2px);
+  box-shadow: 0 4px 12px rgba(138, 0, 74, 0.3);
+}
+
+@media (min-width: 768px) {
+  .footer-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+
+
