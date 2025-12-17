@@ -1,0 +1,37 @@
+/* ===================== Print Styles ===================== */
+@media print {
+  /* Hide entire page */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Show invoice only */
+  #invoiceBox, 
+  #invoiceBox * {
+    visibility: visible !important;
+  }
+
+  /* Make invoice fill print page */
+  #invoiceBox {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100% !important;
+    padding: 25px;
+    background: white !important;
+  }
+
+  /* Hide header and footer */
+  header, footer {
+    display: none !important;
+  }
+
+  /* Prevent gray backgrounds */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+
+
