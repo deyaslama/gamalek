@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الأسئلة الشائعة – لوحة التحكم</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Cairo',sans-serif;
+  background:#f5f7fa;
+  color:#333;
+  margin:0;
+  padding:20px;
+}
+
+.main{
+  max-width:1200px;
+  margin:0 auto;
+  background:#fff;
+  padding:30px;
+  border-radius:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.08);
+}
+
+.header{
+  margin-bottom:30px;
+  padding-bottom:20px;
+  border-bottom:3px solid #065f6a;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.header h1{
+  color:#065f6a;
+  font-size:28px;
+  font-weight:700;
+}
+
+.editor-container{
+  margin-bottom:20px;
+}
+
+.editor-container label{
+  display:block;
+  margin-bottom:8px;
+  font-weight:600;
+  color:#065f6a;
+  font-size:16px;
+}
+
+.editor-container input,
+.editor-container textarea{
+  width:100%;
+  padding:12px;
+  border:2px solid #e0e0e0;
+  border-radius:8px;
+  font-size:14px;
+  font-family:'Cairo',sans-serif;
+  transition:all 0.3s ease;
+}
+
+.editor-container input:focus,
+.editor-container textarea:focus{
+  outline:none;
+  border-color:#065f6a;
+  box-shadow:0 0 0 4px rgba(6, 95, 106, 0.1);
+}
+
+.editor-container textarea{
+  min-height:120px;
+  resize:vertical;
+}
+
+.btn{
+  background:linear-gradient(135deg, #065f6a 0%, #0d7b86 100%);
+  color:#fff;
+  border:none;
+  padding:12px 24px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:16px;
+  font-weight:600;
+  transition:all 0.3s ease;
+  box-shadow:0 2px 8px rgba(6, 95, 106, 0.2);
+}
+
+.btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(6, 95, 106, 0.3);
+}
+
+.btn-red{
+  background:linear-gradient(135deg, #d62828 0%, #b71c1c 100%);
+  box-shadow:0 2px 8px rgba(214, 40, 40, 0.2);
+}
+
+.btn-red:hover{
+  box-shadow:0 4px 12px rgba(214, 40, 40, 0.3);
+}
+
+.btn-light{
+  background:linear-gradient(135deg, #e4e4e4 0%, #d0d0d0 100%);
+  color:#333;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.actions{
+  display:flex;
+  gap:12px;
+  margin-top:20px;
+}
+
+.questions-list{
+  margin-top:30px;
+}
+
+.question-item{
+  background:#f8f9fa;
+  border:2px solid #e0e0e0;
+  border-radius:8px;
+  padding:20px;
+  margin-bottom:15px;
+  position:relative;
+}
+
+.question-item-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.question-number{
+  background:#065f6a;
+  color:#fff;
+  padding:6px 12px;
+  border-radius:6px;
+  font-weight:600;
+  font-size:14px;
+}
+
+.question-item .editor-container{
+  margin-bottom:15px;
+}
+
+.question-item-actions{
+  display:flex;
+  gap:10px;
+  margin-top:15px;
+}
+
+.question-item input,
+.question-item textarea{
+  width:100%;
+  padding:10px;
+  border:2px solid #e0e0e0;
+  border-radius:6px;
+  font-size:14px;
+  font-family:'Cairo',sans-serif;
+}
+
+.question-item input:focus,
+.question-item textarea:focus{
+  outline:none;
+  border-color:#065f6a;
+}
+
+.add-question-btn{
+  width:100%;
+  padding:15px;
+  background:linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  margin-top:20px;
+  transition:all 0.3s ease;
+}
+
+.add-question-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.empty-state{
+  text-align:center;
+  padding:40px;
+  color:#999;
+}
+
+.empty-state p{
+  font-size:18px;
+  margin-bottom:20px;
+}
+</style>
+</head>
+<body>
+
+<div class="main">
+  <div class="header">
+    <h1>❓ الأسئلة الشائعة</h1>
+    <button class="btn" onclick="saveAll()">💾 حفظ الكل</button>
+  </div>
+
+  <div class="editor-container">
+    <label>عنوان الصفحة:</label>
+    <input type="text" id="pageTitle" placeholder="عنوان الصفحة" value="الأسئلة الشائعة">
+  </div>
+
+  <div class="questions-list">
+    <div id="questionsContainer"></div>
+    
+    <button class="add-question-btn" onclick="addQuestion()">➕ إضافة سؤال جديد</button>
+  </div>
+</div>
+
+<script>
+// Load BASE_URL dynamically
+let API = window.location.origin; // Use current origin as default
+(async function() {
+  try {
+    const response = await fetch("/api/config", { credentials: "include" });
+    const config = await response.json();
+    if (config.baseUrl) API = config.baseUrl;
+  } catch (error) {
+    console.warn("Could not load BASE_URL from config, using fallback:", error);
+  }
+})();
+const PAGE_TYPE = "faq";
+let questions = [];
+
+async function loadContent(){
+  try {
+    const res = await fetch(API + "/api/pages/" + PAGE_TYPE);
+    const data = await res.json();
+    
+    if(data.error){
+      // إذا لم يكن هناك محتوى، إنشاء محتوى افتراضي
+      questions = [
+        { question: "كيف يمكنني الطلب من المتجر؟", answer: "يمكنك الطلب بسهولة من خلال تصفح المنتجات، إضافتها إلى السلة، ثم إتمام عملية الشراء. نحن نوفر خدمة توصيل سريعة وآمنة لجميع أنحاء المملكة." },
+        { question: "ما هي مدة التوصيل؟", answer: "نقوم بالتوصيل خلال 2-5 أيام عمل داخل المدن الرئيسية، و5-7 أيام للمناطق الأخرى. يمكنك تتبع طلبك من خلال صفحة \"تتبع الطلب\"." }
+      ];
+      document.getElementById("pageTitle").value = "الأسئلة الشائعة";
+      renderQuestions();
+      return;
+    }
+
+    document.getElementById("pageTitle").value = data.title || "الأسئلة الشائعة";
+    
+    // محاولة تحليل المحتوى كـ JSON
+    try {
+      const parsed = JSON.parse(data.content);
+      if(parsed.questions && Array.isArray(parsed.questions)){
+        questions = parsed.questions;
+      } else {
+        questions = [];
+      }
+    } catch(e) {
+      // إذا لم يكن JSON، إنشاء قائمة فارغة
+      questions = [];
+    }
+    
+    renderQuestions();
+  } catch (error) {
+    console.error("خطأ:", error);
+    alert("حدث خطأ في تحميل المحتوى");
+    questions = [];
+    renderQuestions();
+  }
+}
+
+function renderQuestions(){
+  const container = document.getElementById("questionsContainer");
+  
+  if(questions.length === 0){
+    container.innerHTML = `
+      <div class="empty-state">
+        <p>لا توجد أسئلة حالياً</p>
+        <p style="font-size:14px;color:#999;">اضغط على "إضافة سؤال جديد" لإضافة أول سؤال</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = "";
+  questions.forEach((q, index) => {
+    container.innerHTML += `
+      <div class="question-item" data-index="${index}">
+        <div class="question-item-header">
+          <span class="question-number">سؤال ${index + 1}</span>
+          <button class="btn btn-red" onclick="deleteQuestion(${index})" style="padding:8px 16px;font-size:14px;">🗑️ حذف</button>
+        </div>
+        <div class="editor-container">
+          <label>السؤال:</label>
+          <input type="text" class="question-input" data-index="${index}" value="${escapeHtml(q.question)}" placeholder="اكتب السؤال هنا...">
+        </div>
+        <div class="editor-container">
+          <label>الإجابة:</label>
+          <textarea class="answer-input" data-index="${index}" placeholder="اكتب الإجابة هنا...">${escapeHtml(q.answer)}</textarea>
+        </div>
+      </div>
+    `;
+  });
+  
+  // إضافة مستمعي الأحداث
+  document.querySelectorAll('.question-input').forEach(input => {
+    input.addEventListener('input', function(){
+      const index = parseInt(this.dataset.index);
+      questions[index].question = this.value;
+    });
+  });
+  
+  document.querySelectorAll('.answer-input').forEach(textarea => {
+    textarea.addEventListener('input', function(){
+      const index = parseInt(this.dataset.index);
+      questions[index].answer = this.value;
+    });
+  });
+}
+
+function addQuestion(){
+  questions.push({
+    question: "",
+    answer: ""
+  });
+  renderQuestions();
+  
+  // التمرير للأسفل
+  setTimeout(() => {
+    const lastItem = document.querySelector('.question-item:last-child');
+    if(lastItem){
+      lastItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const input = lastItem.querySelector('.question-input');
+      if(input) input.focus();
+    }
+  }, 100);
+}
+
+function deleteQuestion(index){
+  if(!confirm("هل أنت متأكد من حذف هذا السؤال؟")) return;
+  
+  questions.splice(index, 1);
+  renderQuestions();
+}
+
+function escapeHtml(text){
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+async function saveAll(){
+  const title = document.getElementById("pageTitle").value.trim();
+  
+  if(!title){
+    alert("⚠️ يرجى إدخال عنوان الصفحة");
+    return;
+  }
+  
+  // التحقق من أن جميع الأسئلة مكتملة
+  const incomplete = questions.find((q, index) => !q.question.trim() || !q.answer.trim());
+  if(incomplete){
+    const index = questions.indexOf(incomplete);
+    alert(`⚠️ يرجى إكمال السؤال رقم ${index + 1}`);
+    return;
+  }
+  
+  // إنشاء محتوى JSON
+  const content = JSON.stringify({
+    questions: questions
+  }, null, 2);
+  
+  try {
+    const res = await fetch(API + "/api/admin/pages/" + PAGE_TYPE, {
+      method:"PUT",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ title, content })
+    });
+
+    const data = await res.json();
+    
+    if(data.success){
+      alert("✅ تم حفظ الأسئلة بنجاح!");
+    } else {
+      alert("❌ حدث خطأ أثناء الحفظ: " + (data.error || "خطأ غير معروف"));
+    }
+  } catch (error) {
+    console.error("خطأ:", error);
+    alert("❌ حدث خطأ في الاتصال بالسيرفر");
+  }
+}
+
+// تحميل المحتوى عند فتح الصفحة
+loadContent();
+</script>
+
+</body>
+</html>

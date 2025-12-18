@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إدارة المنتجات – لوحة التحكم</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Cairo',sans-serif;
+  background:#f5f7fa;
+  color:#333;
+  margin:0;
+  padding:0;
+}
+
+.main{
+  margin-right:0;
+  padding:20px;
+  width:100%;
+  box-sizing:border-box;
+}
+
+.header{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.08);
+  margin-bottom:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:15px;
+}
+
+.header span{
+  font-size:22px;
+  font-weight:700;
+  color:#065f6a;
+}
+
+.header > div{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.card{
+  background:#fff;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.08);
+  margin-bottom:20px;
+}
+
+.btn{
+  background:linear-gradient(135deg, #065f6a 0%, #0d7b86 100%);
+  color:#fff;
+  border:none;
+  padding:10px 18px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:600;
+  transition:all 0.3s ease;
+  box-shadow:0 2px 8px rgba(6, 95, 106, 0.2);
+}
+
+.btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(6, 95, 106, 0.3);
+}
+
+.btn-red{
+  background:linear-gradient(135deg, #d62828 0%, #b71c1c 100%);
+  box-shadow:0 2px 8px rgba(214, 40, 40, 0.2);
+}
+
+.btn-red:hover{
+  box-shadow:0 4px 12px rgba(214, 40, 40, 0.3);
+}
+
+.btn-light{
+  background:linear-gradient(135deg, #e4e4e4 0%, #d0d0d0 100%);
+  color:#333;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.search-input{
+  width:100%;
+  padding:12px 16px;
+  border-radius:10px;
+  border:2px solid #e0e0e0;
+  font-size:14px;
+  margin-bottom:15px;
+  transition:all 0.3s ease;
+  background:#fafafa;
+}
+
+.search-input:focus{
+  outline:none;
+  border-color:#065f6a;
+  background:#fff;
+  box-shadow:0 0 0 4px rgba(6, 95, 106, 0.1);
+}
+
+.flex-row{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+select.filter{
+  padding:10px 14px;
+  border-radius:8px;
+  border:2px solid #e0e0e0;
+  font-size:14px;
+  background:#fff;
+  cursor:pointer;
+  transition:all 0.3s ease;
+}
+
+select.filter:focus{
+  outline:none;
+  border-color:#065f6a;
+  box-shadow:0 0 0 4px rgba(6, 95, 106, 0.1);
+}
+
+/* جدول */
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+  background:#fff;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+th,td{
+  padding:12px 8px;
+  text-align:center;
+  border-bottom:1px solid #f0f0f0;
+  font-size:13px;
+}
+
+th{
+  background:linear-gradient(135deg, #065f6a 0%, #0d7b86 100%);
+  color:#fff;
+  font-weight:700;
+  font-size:14px;
+  padding:14px 8px;
+}
+
+tr:hover{
+  background:#f8f9fa;
+}
+
+.product-img{
+  width:50px;
+  height:50px;
+  object-fit:contain;
+  border:2px solid #e0e0e0;
+  padding:4px;
+  border-radius:8px;
+  background:#fff;
+}
+
+.star{
+  font-size:22px;
+  color:#ccc;
+  cursor:pointer;
+  transition:all 0.3s ease;
+}
+
+.star:hover{
+  transform:scale(1.2);
+}
+
+.star.on{
+  color:#ffbf00;
+  text-shadow:0 0 8px rgba(255, 191, 0, 0.5);
+}
+
+.pagination{
+  text-align:center;
+  margin-top:20px;
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.page-btn{
+  padding:8px 14px;
+  border:none;
+  border-radius:8px;
+  background:#e4e4e4;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:600;
+  transition:all 0.3s ease;
+  color:#333;
+}
+
+.page-btn:hover{
+  background:#d0d0d0;
+  transform:translateY(-2px);
+}
+
+.page-btn.active{
+  background:linear-gradient(135deg, #065f6a 0%, #0d7b86 100%);
+  color:#fff;
+  box-shadow:0 2px 8px rgba(6, 95, 106, 0.3);
+}
+
+.counter{
+  font-size:14px;
+  color:#666;
+  font-weight:600;
+  padding:8px 14px;
+  background:#f0f0f0;
+  border-radius:8px;
+}
+
+.modal-overlay{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.6);
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  backdrop-filter:blur(4px);
+}
+
+.modal-box{
+  background:#fff;
+  padding:30px;
+  border-radius:16px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.2);
+  width:90%;
+  max-width:500px;
+  max-height:90vh;
+  overflow-y:auto;
+}
+
+.modal-box h3{
+  text-align:center;
+  color:#065f6a;
+  margin-bottom:20px;
+  font-size:22px;
+  font-weight:800;
+  padding-bottom:15px;
+  border-bottom:3px solid #065f6a;
+}
+
+.modal-input{
+  width:100%;
+  padding:12px 16px;
+  border-radius:10px;
+  border:2px solid #e0e0e0;
+  font-size:14px;
+  margin-bottom:12px;
+  transition:all 0.3s ease;
+  background:#fafafa;
+  font-family:'Cairo',sans-serif;
+}
+
+.modal-input:focus{
+  outline:none;
+  border-color:#065f6a;
+  background:#fff;
+  box-shadow:0 0 0 4px rgba(6, 95, 106, 0.1);
+}
+
+.modal-actions{
+  display:flex;
+  gap:12px;
+  justify-content:flex-end;
+  margin-top:20px;
+  padding-top:20px;
+  border-top:2px solid #f0f0f0;
+}
+</style>
+</head>
+
+<body>
+<!-- التحقق من المصادقة -->
+<script src="/admin/auth-check.js"></script>
+
+<!-- ================= الشريط الجانبي ================ -->
+
+</div>
+
+<!-- ================= المحتوى ================= -->
+<div class="main">
+
+  <div class="header">
+    <span style="font-size:20px;font-weight:600;">إدارة المنتجات</span>
+    <div>
+      <button class="btn" onclick="showAddModal()">➕ إضافة منتج</button>
+      <button class="btn" onclick="exportExcel()">⬇️ تصدير Excel</button>
+      <button class="btn" onclick="showExcelModal()">⬆️ رفع Excel</button>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <input id="searchInput" class="search-input" placeholder="بحث بالاسم، أسكون، الدولي..." oninput="applyFilters()">
+
+    <div class="flex-row">
+
+      <!-- فلتر الماركات -->
+      <select id="brandFilter" class="filter" onchange="applyFilters()">
+        <option value="">كل الماركات</option>
+      </select>
+
+      <!-- فلتر الأقسام -->
+      <select id="categoryFilter" class="filter" onchange="applyFilters()">
+        <option value="">كل الأقسام</option>
+      </select>
+
+      <select id="sortSelect" class="filter" onchange="changeSort()">
+        <option value="">ترتيب افتراضي</option>
+        <option value="name_asc">الاسم (أ→ي)</option>
+        <option value="name_desc">الاسم (ي→أ)</option>
+        <option value="price_asc">السعر من الأقل</option>
+        <option value="price_desc">السعر من الأعلى</option>
+        <option value="date_desc">الأحدث أولاً</option>
+        <option value="date_asc">الأقدم أولاً</option>
+        <option value="discount_desc">أعلى خصم</option>
+      </select>
+
+      <label style="font-size:13px;">
+        <input type="checkbox" id="featuredOnly" onchange="applyFilters()">
+        ⭐ المميزة فقط
+      </label>
+
+      <span id="counter" class="counter"></span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>⭐</th>
+          <th>الصورة</th>
+          <th>الاسم</th>
+          <th>الماركة</th>
+          <th>السعر بعد الضريبة</th>
+          <th>السعر بعد الخصم والضريبة</th>
+          <th>القسم</th>
+          <th>أسكون</th>
+          <th>الدولي</th>
+          <th>المخزون</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="productsTable"></tbody>
+    </table>
+
+    <div id="pagination" class="pagination"></div>
+
+  </div>
+
+</div>
+<!-- ================= نافذة إضافة ================= -->
+<div id="addModal" class="modal-overlay">
+  <div class="modal-box">
+    <h3>إضافة منتج</h3>
+
+    <input id="name" class="modal-input" placeholder="اسم المنتج">
+    <input id="base_price" class="modal-input" placeholder="السعر بدون الضريبة">
+    <input id="askon_code" class="modal-input" placeholder="كود أسكون">
+    <input id="intl_code" class="modal-input" placeholder="الكود الدولي">
+    <label style="display:block;margin-bottom:8px;font-weight:600;color:#065f6a;">صورة المنتج:</label>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:15px;">
+      <input id="image_url" class="modal-input" placeholder="رابط الصورة" style="flex:1;">
+      <input type="file" id="imageUpload" accept="image/*" style="display:none;" onchange="handleProductImageUpload(event)">
+      <button type="button" class="btn btn-small" onclick="document.getElementById('imageUpload').click()">📁 رفع صورة</button>
+    </div>
+    <div id="imagePreview" style="margin-bottom:15px;"></div>
+    <div id="imageUploadStatus" style="margin-bottom:15px;font-size:13px;color:#065f6a;"></div>
+
+    <select id="brand_id" class="modal-input"></select>
+
+    <input id="category" class="modal-input" placeholder="القسم">
+
+    <input id="description" class="modal-input" placeholder="وصف المنتج (اختياري)">
+
+    <input id="discount_value" class="modal-input" placeholder="قيمة الخصم">
+    <select id="discount_type" class="modal-input">
+      <option value="none">بدون خصم</option>
+      <option value="percent">نسبة %</option>
+      <option value="fixed">ثابت</option>
+    </select>
+
+    <select id="featured" class="modal-input">
+      <option value="0">غير مميز</option>
+      <option value="1">⭐ مميز</option>
+    </select>
+
+    <label style="display:block;margin-top:8px;margin-bottom:4px;font-weight:600;color:#065f6a;">كمية المخزون</label>
+    <input id="stock" class="modal-input" type="number" placeholder="كمية المخزون" value="2" min="0" step="1">
+
+    <div class="modal-actions">
+      <button class="btn" onclick="addProduct()">حفظ</button>
+      <button class="btn-red" onclick="hideAddModal()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= نافذة تعديل ================= -->
+<div id="editModal" class="modal-overlay">
+  <div class="modal-box">
+    <h3>تعديل المنتج</h3>
+
+    <input type="hidden" id="edit_id">
+
+    <input id="edit_name" class="modal-input">
+    <input id="edit_base_price" class="modal-input">
+    <input id="edit_askon_code" class="modal-input">
+    <input id="edit_intl_code" class="modal-input">
+    <label style="display:block;margin-bottom:8px;font-weight:600;color:#065f6a;">صورة المنتج:</label>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:15px;">
+      <input id="edit_image_url" class="modal-input" style="flex:1;">
+      <input type="file" id="editImageUpload" accept="image/*" style="display:none;" onchange="handleEditProductImageUpload(event)">
+      <button type="button" class="btn btn-small" onclick="document.getElementById('editImageUpload').click()">📁 رفع صورة</button>
+    </div>
+    <div id="editImagePreview" style="margin-bottom:15px;"></div>
+    <div id="editImageUploadStatus" style="margin-bottom:15px;font-size:13px;color:#065f6a;"></div>
+
+    <select id="edit_brand_id" class="modal-input"></select>
+
+    <input id="edit_category" class="modal-input">
+
+    <input id="edit_description" class="modal-input" placeholder="الوصف">
+
+    <label style="display:block;margin-top:8px;margin-bottom:4px;font-weight:600;color:#065f6a;">كمية المخزون</label>
+    <input id="edit_stock" class="modal-input" type="number" placeholder="كمية المخزون" min="0" step="1">
+
+    <input id="edit_discount_value" class="modal-input">
+    <select id="edit_discount_type" class="modal-input">
+      <option value="none">بدون خصم</option>
+      <option value="percent">نسبة %</option>
+      <option value="fixed">ثابت</option>
+    </select>
+
+    <select id="edit_featured" class="modal-input">
+      <option value="0">غير مميز</option>
+      <option value="1">⭐ مميز</option>
+    </select>
+
+    <div class="modal-actions">
+      <button class="btn" onclick="updateProduct()">حفظ</button>
+      <button class="btn-red" onclick="hideEditModal()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= نافذة Excel ================= -->
+<div id="excelModal" class="modal-overlay">
+  <div class="modal-box">
+    <h3>رفع ملف Excel</h3>
+
+    <input type="file" id="excelFile" class="modal-input">
+
+    <div class="modal-actions">
+      <button class="btn" onclick="uploadExcel()">رفع</button>
+      <button class="btn-red" onclick="hideExcelModal()">إغلاق</button>
+    </div>
+  </div>
+</div>
+<script>
+
+
+
+
+// Load BASE_URL dynamically
+let API = window.location.origin; // Use current origin as default
+(async function() {
+  try {
+    const response = await fetch("/api/config", { credentials: "include" });
+    const config = await response.json();
+    if (config.baseUrl) API = config.baseUrl;
+  } catch (error) {
+    console.warn("Could not load BASE_URL from config, using fallback:", error);
+  }
+})();
+
+// ================= رفع صورة المنتج (إضافة) =================
+async function handleProductImageUpload(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  
+  // التحقق من حجم الملف (10MB)
+  if(file.size > 10 * 1024 * 1024){
+    const statusDiv = document.getElementById("imageUploadStatus");
+    statusDiv.textContent = "❌ حجم الملف كبير جداً (الحد الأقصى 10MB)";
+    statusDiv.style.color = "#dc3545";
+    return;
+  }
+  
+  const statusDiv = document.getElementById("imageUploadStatus");
+  statusDiv.textContent = "جاري الرفع...";
+  statusDiv.style.color = "#065f6a";
+  
+  try {
+    const formData = new FormData();
+    formData.append("image", file);
+    
+    const response = await fetch(API + "/api/admin/upload-image", {
+      method: "POST",
+      credentials: "include",
+      body: formData
+    });
+    
+    const data = await response.json();
+    
+    if(data.success && data.url){
+      const fullUrl = API + data.url;
+      document.getElementById("image_url").value = fullUrl;
+      const previewDiv = document.getElementById("imagePreview");
+      previewDiv.innerHTML = `<img src="${fullUrl}" style="max-width:100%;max-height:200px;border-radius:8px;margin-top:10px;">`;
+      statusDiv.textContent = "✓ تم رفع الصورة بنجاح";
+      statusDiv.style.color = "#28a745";
+    } else {
+      statusDiv.textContent = "❌ " + (data.error || "حدث خطأ في رفع الصورة");
+      statusDiv.style.color = "#dc3545";
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    statusDiv.textContent = "❌ حدث خطأ: " + error.message;
+    statusDiv.style.color = "#dc3545";
+  }
+}
+
+// ================= رفع صورة المنتج (تعديل) =================
+async function handleEditProductImageUpload(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  
+  // التحقق من حجم الملف (10MB)
+  if(file.size > 10 * 1024 * 1024){
+    const statusDiv = document.getElementById("editImageUploadStatus");
+    statusDiv.textContent = "❌ حجم الملف كبير جداً (الحد الأقصى 10MB)";
+    statusDiv.style.color = "#dc3545";
+    return;
+  }
+  
+  const statusDiv = document.getElementById("editImageUploadStatus");
+  statusDiv.textContent = "جاري الرفع...";
+  statusDiv.style.color = "#065f6a";
+  
+  try {
+    const formData = new FormData();
+    formData.append("image", file);
+    
+    const response = await fetch(API + "/api/admin/upload-image", {
+      method: "POST",
+      credentials: "include",
+      body: formData
+    });
+    
+    const data = await response.json();
+    
+    if(data.success && data.url){
+      const fullUrl = API + data.url;
+      document.getElementById("edit_image_url").value = fullUrl;
+      const previewDiv = document.getElementById("editImagePreview");
+      previewDiv.innerHTML = `<img src="${fullUrl}" style="max-width:100%;max-height:200px;border-radius:8px;margin-top:10px;">`;
+      statusDiv.textContent = "✓ تم رفع الصورة بنجاح";
+      statusDiv.style.color = "#28a745";
+    } else {
+      statusDiv.textContent = "❌ " + (data.error || "حدث خطأ في رفع الصورة");
+      statusDiv.style.color = "#dc3545";
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    statusDiv.textContent = "❌ حدث خطأ: " + error.message;
+    statusDiv.style.color = "#dc3545";
+  }
+}
+
+let products = [];
+let brands = [];
+let filtered = [];
+let currentPage = 1;
+const perPage = 20;
+let currentSort = "";
+
+/* ================= روابط الصور ================= */
+function safeImageURL(url) {
+  if (!url) return "";
+  url = url.trim();
+
+  // روابط Google Drive
+  if (url.includes("drive.google.com") || url.includes("lh3.googleusercontent.com")) {
+    const match = url.match(/[-\w]{25,}/);
+    if (match) {
+      return `https://lh3.googleusercontent.com/d/${match[0]}`;
+    }
+    return url;
+  }
+
+  // روابط مباشرة (zid, nahdi, amazon ... إلخ)
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  return url;
+}
+
+/* ================= مودالات ================= */
+function showAddModal(){ document.getElementById("addModal").style.display="flex"; }
+function hideAddModal(){ document.getElementById("addModal").style.display="none"; }
+
+function showEditModal(){ document.getElementById("editModal").style.display="flex"; }
+function hideEditModal(){ document.getElementById("editModal").style.display="none"; }
+
+function showExcelModal(){ document.getElementById("excelModal").style.display="flex"; }
+function hideExcelModal(){ document.getElementById("excelModal").style.display="none"; }
+
+/* ================= تحميل الماركات ================= */
+async function loadBrands(){
+  const res = await fetch(API + "/api/admin/brands");
+  brands = await res.json();
+
+  const addSel = document.getElementById("brand_id");
+  const editSel = document.getElementById("edit_brand_id");
+  const filterSel = document.getElementById("brandFilter");
+
+  addSel.innerHTML = `<option value="">بدون ماركة</option>`;
+  editSel.innerHTML = `<option value="">بدون ماركة</option>`;
+  filterSel.innerHTML = `<option value="">كل الماركات</option>`;
+
+  brands.forEach(b=>{
+    addSel.innerHTML += `<option value="${b.id}">${b.name}</option>`;
+    editSel.innerHTML += `<option value="${b.id}">${b.name}</option>`;
+    filterSel.innerHTML += `<option value="${b.id}">${b.name}</option>`;
+  });
+}
+
+/* ================= تحميل المنتجات ================= */
+async function loadProducts(){
+  try {
+    const res = await fetch(API + "/api/admin/products");
+    const productsList = await res.json();
+    
+    // التأكد من أن جميع المنتجات لديها stock
+    products = productsList.map(p => ({
+      ...p,
+      stock: parseInt(p.stock || p.quantity || 0),
+      quantity: parseInt(p.quantity || p.stock || 0)
+    }));
+
+    buildCategoryFilter();
+    applyFilters();
+  } catch (error) {
+    console.error("خطأ في تحميل المنتجات:", error);
+    alert("حدث خطأ في تحميل المنتجات");
+  }
+}
+
+/* ================= بناء الأقسام ================= */
+function buildCategoryFilter(){
+  const sel = document.getElementById("categoryFilter");
+  const cats = [...new Set(products.map(p=>p.category).filter(Boolean))];
+  sel.innerHTML = `<option value="">كل الأقسام</option>`;
+  cats.forEach(c=> sel.innerHTML += `<option value="${c}">${c}</option>`);
+}
+
+/* ================= فلترة ================= */
+function applyFilters(){
+  const q = document.getElementById("searchInput").value.trim();
+  const cat = document.getElementById("categoryFilter").value;
+  const brand = document.getElementById("brandFilter").value;
+  const featuredOnly = document.getElementById("featuredOnly").checked;
+
+  filtered = products.filter(p=>{
+    const s = !q || (p.name||"").includes(q) || (p.askon_code||"").includes(q) || (p.intl_code||"").includes(q);
+    const c = !cat || p.category === cat;
+    const b = !brand || p.brand_id == brand;
+    const f = !featuredOnly || p.featured == 1;
+    return s && c && b && f;
+  });
+
+  sortProducts();
+  currentPage = 1;
+  renderTable();
+}
+
+/* ================= ترتيب ================= */
+function changeSort(){
+  currentSort = document.getElementById("sortSelect").value;
+  sortProducts();
+  currentPage = 1;
+  renderTable();
+}
+
+function sortProducts(){
+  if(!currentSort) return;
+
+  const [field,dir] = currentSort.split("_");
+
+  filtered.sort((a,b)=>{
+    let va, vb;
+
+    if(field==="name"){ va = (a.name||"").toLowerCase(); vb = (b.name||"").toLowerCase(); }
+    else if(field==="price"){ va = parseFloat(a.base_price)||0; vb = parseFloat(b.base_price)||0; }
+    else if(field==="date"){ va = new Date(a.created_at).getTime(); vb = new Date(b.created_at).getTime(); }
+    else if(field==="discount"){ va = parseFloat(a.discount_value)||0; vb = parseFloat(b.discount_value)||0; }
+
+    if(va < vb) return dir==="asc"?-1:1;
+    if(va > vb) return dir==="asc"?1:-1;
+    return 0;
+  });
+}
+function calculateFinalPrice(product) {
+    let base = parseFloat(product.base_price) || 0;
+    let discountValue = parseFloat(product.discount_value) || 0;
+    let type = product.discount_type;
+
+    let priceAfterDiscount = base;
+
+    if (type === "percent") {
+        priceAfterDiscount = base - (base * (discountValue / 100));
+    } else if (type === "fixed") {
+        priceAfterDiscount = base - discountValue;
+    }
+
+    if (priceAfterDiscount < 0) priceAfterDiscount = 0;
+
+    let finalPrice = priceAfterDiscount * 1.15;
+    let beforePrice = base * 1.15;
+
+    return {
+        before: beforePrice.toFixed(2), // 224.25
+        final: finalPrice.toFixed(2)    // 100.91
+    };
+}
+
+/* ================= جدول ================= */
+function renderTable(){
+  const tbody = document.getElementById("productsTable");
+  tbody.innerHTML = "";
+
+  const start = (currentPage-1)*perPage;
+  const end = start+perPage;
+  const list = filtered.slice(start,end);
+
+  list.forEach(p=>{
+    // التأكد من أن المخزون موجود
+    const stockValue = parseInt(p.stock || p.quantity || 0);
+    
+    const imgURL = safeImageURL(p.image_url);
+    const prices = calculateFinalPrice(p);
+
+    tbody.innerHTML += `
+<tr>
+  <!-- ⭐ -->
+  <td>
+    <span class="star ${p.featured?'on':''}" onclick="toggleFeatured(${p.id},${p.featured})">
+      ${p.featured?'★':'☆'}
+    </span>
+  </td>
+
+  <!-- الصورة -->
+  <td>
+    <img class="product-img"
+         src="${imgURL}"
+         referrerpolicy="no-referrer"
+         onerror="this.src='https://via.placeholder.com/80?text=No+Image'">
+  </td>
+
+  <!-- الاسم -->
+  <td>${p.name}</td>
+
+  <!-- الماركة -->
+  <td>${p.brand_name || "-"}</td>
+
+  <!-- السعر بعد الخصم + الضريبة (نهائي) -->
+  <td style="font-weight:bold; color:${p.discount_type !== 'none' ? 'red' : '#006b6a'};">
+    ${prices.final} ر.س
+</td>
+
+
+  <!-- السعر قبل الخصم (الأساسي + الضريبة) -->
+  <td style="text-decoration:line-through;color:#999;">${prices.before} ر.س</td>
+
+  <!-- القسم -->
+  <td>${p.category || "-"}</td>
+
+  <!-- أسكون -->
+  <td>${p.askon_code || "-"}</td>
+
+  <!-- الدولي -->
+  <td>${p.intl_code || "-"}</td>
+
+  <!-- المخزون -->
+  <td>
+    <span style="
+      display:inline-block;
+      padding:4px 12px;
+      border-radius:8px;
+      font-weight:700;
+      font-size:14px;
+      background:${stockValue > 0 ? '#d4edda' : '#f8d7da'};
+      color:${stockValue > 0 ? '#155724' : '#721c24'};
+    ">
+      ${stockValue}
+    </span>
+  </td>
+
+  <!-- إجراءات -->
+  <td>
+    <button class="btn-light" onclick="openEditModal(${p.id})">تعديل</button>
+    <button class="btn-red" onclick="deleteProduct(${p.id})">حذف</button>
+  </td>
+</tr>
+
+    `;
+  });
+
+  renderPagination();
+}
+
+/* ================= تصدير اكسل ================= */
+
+function exportExcel(){
+    const url = API + "/api/admin/products/export";
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "products.xlsx";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+}
+
+
+/* ================= صفحات ================= */
+function renderPagination(){
+  const total = Math.ceil(filtered.length/perPage);
+  let html="";
+  for(let i=1;i<=total;i++){
+    html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  document.getElementById("pagination").innerHTML = html;
+}
+
+function goPage(n){
+  currentPage = n;
+  renderTable();
+}
+
+/* ================= إضافة ================= */
+async function addProduct(){
+  const stockValue = parseInt(document.getElementById("stock").value) || 2;
+  
+  const body = {
+    name: document.getElementById("name").value,
+    base_price: document.getElementById("base_price").value,
+    askon_code: document.getElementById("askon_code").value,
+    intl_code: document.getElementById("intl_code").value,
+    image_url: document.getElementById("image_url").value,
+    brand_id: document.getElementById("brand_id").value,
+    category: document.getElementById("category").value,
+    description: document.getElementById("description").value,
+    discount_value: document.getElementById("discount_value").value,
+    discount_type: document.getElementById("discount_type").value,
+    featured: document.getElementById("featured").value,
+    stock: stockValue
+  };
+
+  const res = await fetch(API + "/api/admin/products", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify(body)
+  });
+
+  const data = await res.json();
+  
+  if(data.success || !data.error){
+    // مسح الحقول بعد الإضافة
+    document.getElementById("name").value = "";
+    document.getElementById("base_price").value = "";
+    document.getElementById("askon_code").value = "";
+    document.getElementById("intl_code").value = "";
+    document.getElementById("image_url").value = "";
+    document.getElementById("brand_id").value = "";
+    document.getElementById("category").value = "";
+    document.getElementById("description").value = "";
+    document.getElementById("discount_value").value = "";
+    document.getElementById("discount_type").value = "none";
+    document.getElementById("featured").value = "0";
+    document.getElementById("stock").value = "2";
+    
+    hideAddModal();
+    loadProducts(); // إعادة تحميل من السيرفر
+  } else {
+    alert("حدث خطأ أثناء الإضافة: " + (data.error || "خطأ غير معروف"));
+  }
+}
+
+/* ================= تعديل ================= */
+function openEditModal(id){
+  const p = products.find(x=>parseInt(x.id) === parseInt(id));
+  
+  if(!p){
+    alert("المنتج غير موجود");
+    return;
+  }
+
+  const currentStock = parseInt(p.stock || p.quantity || 0);
+  console.log("فتح نافذة التعديل - المنتج:", p.name, "المخزون الحالي:", currentStock);
+
+  document.getElementById("edit_id").value = p.id;
+  document.getElementById("edit_name").value = p.name || "";
+  document.getElementById("edit_base_price").value = p.base_price || "";
+  document.getElementById("edit_askon_code").value = p.askon_code || "";
+  document.getElementById("edit_intl_code").value = p.intl_code || "";
+  document.getElementById("edit_image_url").value = p.image_url || "";
+  document.getElementById("edit_brand_id").value = p.brand_id || "";
+  document.getElementById("edit_category").value = p.category || "";
+  document.getElementById("edit_description").value = p.description || "";
+  document.getElementById("edit_discount_value").value = p.discount_value || "";
+  document.getElementById("edit_discount_type").value = p.discount_type || "none";
+  document.getElementById("edit_featured").value = p.featured || "0";
+  document.getElementById("edit_stock").value = currentStock;
+
+  showEditModal();
+}
+
+async function updateProduct(){
+  const id = parseInt(document.getElementById("edit_id").value);
+  const stockInput = document.getElementById("edit_stock").value;
+  const stockValue = stockInput !== "" ? parseInt(stockInput) : 0;
+
+  if(isNaN(stockValue)){
+    alert("⚠️ يرجى إدخال قيمة صحيحة للمخزون");
+    return;
+  }
+
+  console.log("تحديث المنتج:", id, "المخزون الجديد:", stockValue);
+
+  const body = {
+    name: document.getElementById("edit_name").value,
+    base_price: document.getElementById("edit_base_price").value,
+    askon_code: document.getElementById("edit_askon_code").value,
+    intl_code: document.getElementById("edit_intl_code").value,
+    image_url: document.getElementById("edit_image_url").value,
+    brand_id: document.getElementById("edit_brand_id").value,
+    category: document.getElementById("edit_category").value,
+    description: document.getElementById("edit_description").value,
+    discount_value: document.getElementById("edit_discount_value").value,
+    discount_type: document.getElementById("edit_discount_type").value,
+    featured: document.getElementById("edit_featured").value,
+    stock: stockValue
+  };
+
+  console.log("بيانات التحديث:", body);
+
+  try {
+    const res = await fetch(API + "/api/admin/products/" + id, {
+      method:"PUT",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify(body)
+    });
+
+    const data = await res.json();
+    console.log("استجابة السيرفر:", data);
+    
+    if(data.success || !data.error){
+      console.log("✅ تم تحديث المخزون بنجاح:", stockValue);
+      
+      // تحديث البيانات المحلية مباشرة
+      const productIndex = products.findIndex(p => parseInt(p.id) === parseInt(id));
+      if(productIndex !== -1){
+      products[productIndex].stock = stockValue;
+      products[productIndex].quantity = stockValue;
+        console.log("✅ تم تحديث products:", products[productIndex]);
+      }
+      
+      // تحديث filtered أيضاً
+      const filteredIndex = filtered.findIndex(p => parseInt(p.id) === parseInt(id));
+      if(filteredIndex !== -1){
+      filtered[filteredIndex].stock = stockValue;
+      filtered[filteredIndex].quantity = stockValue;
+        console.log("✅ تم تحديث filtered:", filtered[filteredIndex]);
+      }
+      
+      hideEditModal();
+      
+      // إعادة تحميل من السيرفر للتأكد من التزامن
+      await loadProducts();
+      
+      // إعادة عرض الجدول
+      renderTable();
+      
+      alert("✅ تم تحديث المنتج بنجاح!");
+    } else {
+      console.error("❌ خطأ في التحديث:", data);
+      alert("❌ حدث خطأ أثناء التحديث: " + (data.error || "خطأ غير معروف"));
+    }
+  } catch (error) {
+    console.error("❌ خطأ في الاتصال:", error);
+    alert("❌ حدث خطأ في الاتصال بالسيرفر");
+  }
+}
+
+/* ================= حذف ================= */
+async function deleteProduct(id){
+  if(!confirm("هل تريد حذف المنتج؟")) return;
+  await fetch(API + "/api/admin/products/" + id, { method:"DELETE" });
+  loadProducts();
+}
+
+/* ================= نجمة ================= */
+async function toggleFeatured(id,current){
+  await fetch(API + "/api/admin/products/feature", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ id, featured: current?0:1 })
+  });
+  loadProducts();
+}
+
+/* ================= رفع Excel ================= */
+async function uploadExcel(){
+  const file = document.getElementById("excelFile").files[0];
+  if(!file){ alert("اختر ملف"); return; }
+
+  const form = new FormData();
+  form.append("file", file);
+
+  await fetch(API + "/api/admin/products/upload-excel", {
+    method:"POST",
+    body: form
+  });
+
+  hideExcelModal();
+  loadProducts();
+}
+
+/* ================= تشغيل ================= */
+(async ()=>{
+  await loadBrands();
+  await loadProducts();
+})();
+</script>
+
+
+</body>
