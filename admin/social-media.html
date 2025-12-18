@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>السوشيال ميديا – لوحة التحكم</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Cairo',sans-serif;
+  background:#f5f7fa;
+  color:#333;
+  margin:0;
+  padding:20px;
+}
+
+.main{
+  max-width:1400px;
+  margin:0 auto;
+  background:#fff;
+  padding:30px;
+  border-radius:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.08);
+}
+
+.header{
+  margin-bottom:30px;
+  padding-bottom:20px;
+  border-bottom:3px solid #065f6a;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:15px;
+}
+
+.header h1{
+  color:#065f6a;
+  font-size:28px;
+  font-weight:700;
+}
+
+.btn-add{
+  padding:12px 24px;
+  background:linear-gradient(135deg, #065f6a 0%, #0d7b86 100%);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.3s ease;
+  font-family:'Cairo',sans-serif;
+}
+
+.btn-add:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(6,95,106,0.3);
+}
+
+.social-list{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
+  gap:20px;
+}
+
+.social-item{
+  background:#fff;
+  border:2px solid #e0e0e0;
+  border-radius:12px;
+  padding:25px;
+  transition:all 0.3s ease;
+}
+
+.social-item.active{
+  border-color:#28a745;
+  background:#f0f8f0;
+}
+
+.social-item.inactive{
+  border-color:#dc3545;
+  background:#fff5f5;
+  opacity:0.7;
+}
+
+.social-header{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  margin-bottom:20px;
+  padding-bottom:15px;
+  border-bottom:2px solid #f0f0f0;
+}
+
+.social-icon{
+  font-size:40px;
+  width:60px;
+  height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius:12px;
+}
+
+.social-info{
+  flex:1;
+}
+
+.social-platform{
+  font-size:18px;
+  font-weight:700;
+  color:#065f6a;
+  margin-bottom:5px;
+  text-transform:capitalize;
+}
+
+.social-status{
+  padding:4px 12px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:600;
+  display:inline-block;
+}
+
+.social-status.active{
+  background:#28a745;
+  color:#fff;
+}
+
+.social-status.inactive{
+  background:#dc3545;
+  color:#fff;
+}
+
+.social-url{
+  margin-bottom:15px;
+}
+
+.social-url label{
+  display:block;
+  font-weight:600;
+  color:#333;
+  margin-bottom:8px;
+  font-size:14px;
+}
+
+.social-url input{
+  width:100%;
+  padding:10px 15px;
+  border:2px solid #e0e0e0;
+  border-radius:8px;
+  font-size:14px;
+  font-family:'Cairo',sans-serif;
+  transition:border-color 0.3s ease;
+}
+
+.social-url input:focus{
+  outline:none;
+  border-color:#065f6a;
+}
+
+.social-icon-input{
+  margin-bottom:15px;
+}
+
+.social-icon-input label{
+  display:block;
+  font-weight:600;
+  color:#333;
+  margin-bottom:8px;
+  font-size:14px;
+}
+
+.social-icon-input input{
+  width:100%;
+  padding:10px 15px;
+  border:2px solid #e0e0e0;
+  border-radius:8px;
+  font-size:14px;
+  font-family:'Cairo',sans-serif;
+  transition:border-color 0.3s ease;
+}
+
+.social-icon-input input:focus{
+  outline:none;
+  border-color:#065f6a;
+}
+
+.social-icon-preview{
+  margin-top:10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.social-icon-preview img{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:#f8f9fa;
+  padding:8px;
+  border:2px solid #e0e0e0;
+  object-fit:contain;
+}
+
+.social-actions{
+  display:flex;
+  gap:10px;
+  margin-top:20px;
+  padding-top:20px;
+  border-top:2px solid #f0f0f0;
+  flex-wrap:wrap;
+}
+
+.btn{
+  padding:10px 20px;
+  border:none;
+  border-radius:8px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.3s ease;
+  font-family:'Cairo',sans-serif;
+  flex:1;
+  min-width:100px;
+}
+
+.btn-save{
+  background:#28a745;
+  color:#fff;
+}
+
+.btn-save:hover{
+  background:#218838;
+  transform:translateY(-2px);
+  box-shadow:0 4px 8px rgba(40,167,69,0.3);
+}
+
+.btn-delete{
+  background:#dc3545;
+  color:#fff;
+}
+
+.btn-delete:hover{
+  background:#c82333;
+  transform:translateY(-2px);
+  box-shadow:0 4px 8px rgba(220,53,69,0.3);
+}
+
+.btn-toggle{
+  background:#ffc107;
+  color:#000;
+}
+
+.btn-toggle:hover{
+  background:#e0a800;
+  transform:translateY(-2px);
+  box-shadow:0 4px 8px rgba(255,193,7,0.3);
+}
+
+.loading{
+  text-align:center;
+  padding:40px;
+  color:#999;
+  font-size:18px;
+}
+
+.error{
+  text-align:center;
+  padding:40px;
+  color:#dc3545;
+  font-size:18px;
+}
+
+.empty{
+  text-align:center;
+  padding:60px 20px;
+  color:#999;
+  font-size:18px;
+}
+
+.modal{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+  z-index:10000;
+  align-items:center;
+  justify-content:center;
+}
+
+.modal.active{
+  display:flex;
+}
+
+.modal-content{
+  background:#fff;
+  padding:30px;
+  border-radius:12px;
+  max-width:500px;
+  width:90%;
+  max-height:90vh;
+  overflow-y:auto;
+}
+
+.modal-header{
+  margin-bottom:20px;
+  padding-bottom:15px;
+  border-bottom:2px solid #f0f0f0;
+}
+
+.modal-header h2{
+  color:#065f6a;
+  font-size:24px;
+  font-weight:700;
+}
+
+.form-group{
+  margin-bottom:20px;
+}
+
+.form-group label{
+  display:block;
+  font-weight:600;
+  color:#333;
+  margin-bottom:8px;
+  font-size:14px;
+}
+
+.form-group input,
+.form-group select{
+  width:100%;
+  padding:12px 15px;
+  border:2px solid #e0e0e0;
+  border-radius:8px;
+  font-size:14px;
+  font-family:'Cairo',sans-serif;
+  transition:border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus{
+  outline:none;
+  border-color:#065f6a;
+}
+
+.modal-actions{
+  display:flex;
+  gap:10px;
+  margin-top:25px;
+}
+
+.btn-cancel{
+  background:#6c757d;
+  color:#fff;
+}
+
+.btn-cancel:hover{
+  background:#5a6268;
+}
+</style>
+</head>
+<body>
+
+<div class="main">
+  <div class="header">
+    <h1>📱 إدارة السوشيال ميديا</h1>
+    <button class="btn-add" onclick="showAddModal()">+ إضافة منصة جديدة</button>
+  </div>
+
+  <div id="socialContainer" class="social-list">
+    <div class="loading">جاري التحميل...</div>
+  </div>
+</div>
+
+<!-- Modal إضافة/تعديل -->
+<div id="addModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">إضافة منصة جديدة</h2>
+    </div>
+    <form id="socialForm" onsubmit="saveSocialMedia(event)">
+      <input type="hidden" id="socialId" value="">
+      
+      <div class="form-group">
+        <label>اسم المنصة:</label>
+        <input type="text" id="socialPlatform" required placeholder="مثال: facebook, instagram">
+      </div>
+      
+      <div class="form-group">
+        <label>الرابط (URL):</label>
+        <input type="url" id="socialUrl" required placeholder="https://facebook.com/yourpage">
+      </div>
+      
+      <div class="form-group">
+        <label>رابط الأيقونة (URL):</label>
+        <input type="url" id="socialIcon" placeholder="https://example.com/icon.png" oninput="updateModalPreview()">
+        <small style="color:#666;font-size:12px;display:block;margin-top:5px;">ضع رابط صورة الأيقونة</small>
+        <div class="social-icon-preview" id="modalPreview" style="margin-top:10px;">
+          <span style="color:#999;font-size:12px;">معاينة الأيقونة</span>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>ترتيب العرض:</label>
+        <input type="number" id="socialOrder" value="0" min="0">
+      </div>
+      
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-save">حفظ</button>
+        <button type="button" class="btn btn-cancel" onclick="hideAddModal()">إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Load BASE_URL dynamically
+let API = "http://localhost:3000";
+(async function() {
+  try {
+    const response = await fetch("/api/config", { credentials: "include" });
+    const config = await response.json();
+    if (config.baseUrl) API = config.baseUrl;
+  } catch (error) {
+    console.warn("Could not load BASE_URL from config, using fallback:", error);
+  }
+})();
+let allSocialMedia = [];
+
+async function loadSocialMedia() {
+  const container = document.getElementById("socialContainer");
+  container.innerHTML = '<div class="loading">جاري التحميل...</div>';
+
+  try {
+    const res = await fetch(API + "/api/admin/social-media");
+    if (!res.ok) throw new Error("خطأ في الاتصال");
+    
+    allSocialMedia = await res.json();
+    displaySocialMedia(allSocialMedia);
+  } catch (error) {
+    console.error("Error loading social media:", error);
+    container.innerHTML = '<div class="error">حدث خطأ في تحميل السوشيال ميديا</div>';
+  }
+}
+
+function displaySocialMedia(socialMedia) {
+  const container = document.getElementById("socialContainer");
+  
+  if (socialMedia.length === 0) {
+    container.innerHTML = '<div class="empty">لا توجد منصات سوشيال ميديا</div>';
+    return;
+  }
+
+  container.innerHTML = socialMedia.map(sm => {
+    const statusClass = sm.active == 1 ? 'active' : 'inactive';
+    const statusText = sm.active == 1 ? 'نشط' : 'غير نشط';
+    
+    return `
+      <div class="social-item ${statusClass}">
+        <div class="social-header">
+          <div class="social-icon">
+          ${sm.icon_url ? `<img src="${sm.icon_url}" alt="${sm.platform}" style="width:40px;height:40px;object-fit:contain;" onerror="this.style.display='none'; this.parentElement.innerHTML='🔗';">` : '🔗'}
+        </div>
+          <div class="social-info">
+            <div class="social-platform">${sm.platform}</div>
+            <span class="social-status ${statusClass}">${statusText}</span>
+          </div>
+        </div>
+        
+        <div class="social-url">
+          <label>الرابط:</label>
+          <input type="url" 
+                 id="url_${sm.id}" 
+                 value="${sm.url || ''}" 
+                 placeholder="https://...">
+        </div>
+        
+        <div class="social-icon-input">
+          <label>رابط الأيقونة (URL):</label>
+          <input type="url" 
+                 id="icon_${sm.id}" 
+                 value="${sm.icon_url || ''}" 
+                 placeholder="https://example.com/icon.png"
+                 oninput="updateIconPreview(${sm.id})">
+          <div class="social-icon-preview" id="preview_${sm.id}">
+            ${sm.icon_url ? `<img src="${sm.icon_url}" alt="Preview" onerror="this.style.display='none';">` : ''}
+            <span style="color:#999;font-size:12px;">معاينة الأيقونة</span>
+          </div>
+        </div>
+        
+        <div class="social-actions">
+          <button class="btn btn-save" onclick="updateSocialMedia(${sm.id})">
+            💾 حفظ
+          </button>
+          <button class="btn btn-toggle" onclick="toggleSocialMedia(${sm.id}, ${sm.active == 1 ? 0 : 1})">
+            ${sm.active == 1 ? '👁️ إخفاء' : '👁️ إظهار'}
+          </button>
+          <button class="btn btn-delete" onclick="deleteSocialMedia(${sm.id})">
+            🗑️ حذف
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateIconPreview(id) {
+  const iconUrl = document.getElementById(`icon_${id}`).value;
+  const preview = document.getElementById(`preview_${id}`);
+  
+  if (iconUrl && preview) {
+    preview.innerHTML = `
+      <img src="${iconUrl}" alt="Preview" onerror="this.style.display='none';">
+      <span style="color:#999;font-size:12px;">معاينة الأيقونة</span>
+    `;
+  } else {
+    preview.innerHTML = '<span style="color:#999;font-size:12px;">معاينة الأيقونة</span>';
+  }
+}
+
+async function updateSocialMedia(id) {
+  const url = document.getElementById(`url_${id}`).value;
+  const icon_url = document.getElementById(`icon_${id}`).value;
+  const social = allSocialMedia.find(sm => sm.id === id);
+  
+  if (!url) {
+    alert('الرابط مطلوب');
+    return;
+  }
+
+  try {
+    const res = await fetch(API + `/api/admin/social-media/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: url,
+        icon_url: icon_url || '',
+        active: social.active,
+        display_order: social.display_order || 0
+      })
+    });
+
+    const data = await res.json();
+    
+    if (data.success) {
+      alert('تم تحديث المنصة بنجاح');
+      loadSocialMedia();
+    } else {
+      alert('حدث خطأ في التحديث');
+    }
+  } catch (error) {
+    console.error("Error updating social media:", error);
+    alert('حدث خطأ في الاتصال');
+  }
+}
+
+async function toggleSocialMedia(id, newStatus) {
+  const social = allSocialMedia.find(sm => sm.id === id);
+  
+  try {
+      const res = await fetch(API + `/api/admin/social-media/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: social.url,
+        icon_url: social.icon_url || '',
+        active: newStatus,
+        display_order: social.display_order || 0
+      })
+    });
+
+    const data = await res.json();
+    
+    if (data.success) {
+      loadSocialMedia();
+    } else {
+      alert('حدث خطأ في التحديث');
+    }
+  } catch (error) {
+    console.error("Error toggling social media:", error);
+    alert('حدث خطأ في الاتصال');
+  }
+}
+
+async function deleteSocialMedia(id) {
+  if (!confirm('هل أنت متأكد من حذف هذه المنصة؟')) {
+    return;
+  }
+
+  try {
+    const res = await fetch(API + `/api/admin/social-media/${id}`, {
+      method: 'DELETE'
+    });
+
+    const data = await res.json();
+    
+    if (data.success) {
+      alert('تم حذف المنصة بنجاح');
+      loadSocialMedia();
+    } else {
+      alert('حدث خطأ في الحذف');
+    }
+  } catch (error) {
+    console.error("Error deleting social media:", error);
+    alert('حدث خطأ في الاتصال');
+  }
+}
+
+function updateModalPreview() {
+  const iconUrl = document.getElementById('socialIcon').value;
+  const preview = document.getElementById('modalPreview');
+  
+  if (iconUrl && preview) {
+    preview.innerHTML = `
+      <img src="${iconUrl}" alt="Preview" onerror="this.style.display='none';">
+      <span style="color:#999;font-size:12px;">معاينة الأيقونة</span>
+    `;
+  } else {
+    preview.innerHTML = '<span style="color:#999;font-size:12px;">معاينة الأيقونة</span>';
+  }
+}
+
+function showAddModal() {
+  document.getElementById('modalTitle').textContent = 'إضافة منصة جديدة';
+  document.getElementById('socialId').value = '';
+  document.getElementById('socialPlatform').value = '';
+  document.getElementById('socialUrl').value = '';
+  document.getElementById('socialIcon').value = '';
+  document.getElementById('socialOrder').value = '0';
+  document.getElementById('modalPreview').innerHTML = '<span style="color:#999;font-size:12px;">معاينة الأيقونة</span>';
+  document.getElementById('addModal').classList.add('active');
+}
+
+function hideAddModal() {
+  document.getElementById('addModal').classList.remove('active');
+}
+
+async function saveSocialMedia(event) {
+  event.preventDefault();
+  
+  const id = document.getElementById('socialId').value;
+  const platform = document.getElementById('socialPlatform').value.trim();
+  const url = document.getElementById('socialUrl').value.trim();
+  const icon_url = document.getElementById('socialIcon').value.trim();
+  const order = parseInt(document.getElementById('socialOrder').value) || 0;
+
+  if (!platform || !url) {
+    alert('اسم المنصة والرابط مطلوبان');
+    return;
+  }
+
+  try {
+    let res;
+    if (id) {
+      // Update
+      res = await fetch(API + `/api/admin/social-media/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: url,
+          icon_url: icon_url || '',
+          active: 1,
+          display_order: order
+        })
+      });
+    } else {
+      // Create
+      res = await fetch(API + '/api/admin/social-media', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          platform: platform.toLowerCase(),
+          url: url,
+          icon_url: icon_url || '',
+          active: 1,
+          display_order: order
+        })
+      });
+    }
+
+    const data = await res.json();
+    
+    if (data.success) {
+      alert(id ? 'تم التحديث بنجاح' : 'تم الإضافة بنجاح');
+      hideAddModal();
+      loadSocialMedia();
+    } else {
+      alert(data.message || 'حدث خطأ');
+    }
+  } catch (error) {
+    console.error("Error saving social media:", error);
+    alert('حدث خطأ في الاتصال');
+  }
+}
+
+// إغلاق Modal عند الضغط خارجه
+document.getElementById('addModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    hideAddModal();
+  }
+});
+
+// تحميل السوشيال ميديا عند فتح الصفحة
+loadSocialMedia();
+</script>
+
+</body>
+</html>
+
